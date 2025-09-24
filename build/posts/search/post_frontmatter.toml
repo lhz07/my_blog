@@ -1,0 +1,8 @@
+title = 'Search'
+file_name = 'search'
+description = 'Search in artificial intelligence'
+tags = ['AI', 'Search']
+posted = '2025/09/24'
+estimated_reading_time = 10
+author = 'lhz07'
+order = 3
