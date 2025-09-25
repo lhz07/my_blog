@@ -5,7 +5,7 @@
 /* 代码块样式，带横向滚动和间距 */
 /* dark: bg-gray-800 */
 .markdown-body pre {
-    @apply overflow-x-auto bg-gray-100 rounded-md p-4 mb-4;
+    @apply overflow-x-auto bg-gray-100 rounded-md px-2 py-6 mb-4 border border-gray-300;
     white-space: pre; /* 保持空格和换行 */
 }
 
@@ -14,9 +14,13 @@
     @apply font-mono text-sm;
 }
 
+.code-group {
+    @apply relative;
+}
+
 /* copy button */
 .copy-btn {
-    @apply absolute top-2 right-2 bg-gray-200 text-gray-700 px-2 py-1 text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity;
+    @apply absolute top-2 right-2 bg-gray-300 text-gray-700 px-1 py-1 text-xs rounded bg-opacity-0 hover:bg-opacity-100 transition-all;
 }
 
 .markdown-body h1 {
@@ -106,7 +110,9 @@
 }
 
 .markdown-body table {
-    @apply border-collapse border border-gray-300 mb-4;
+    display: inline-block;
+    overflow-x: auto;
+    @apply max-w-full border-collapse border border-gray-300 mb-4;
 }
 
 .markdown-body th,

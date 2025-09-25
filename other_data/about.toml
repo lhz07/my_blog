@@ -1,0 +1,26 @@
+tech_stack = ["Rust", "C++", "Qt", "Python", "Objective C (?)", "Web (?)"]
+
+[[repo]]
+name = "my_blog"
+url = "https://github.com/lhz07/my_blog"
+description = "My personal blog built with Rust and Actix-web"
+
+[[repo]]
+name = "bangumi_download"
+url = "https://github.com/lhz07/bangumi_download"
+description = "A tool to download bangumi automatically from mikan"
+
+[[contact]]
+name = "GitHub"
+url = "https://github.com/lhz07"
+icon = "/static/img/github.svg"
+
+[[contact]]
+name = "Email"
+url = "mailto:a2722764368@gmail.com"
+icon = "/static/img/mail.svg"
+
+[profile]
+subtitle = "A student who loves programming"
+description = "Explicit is better than implicit, but readability also counts."
+pic = "/static/img/avatar.webp"

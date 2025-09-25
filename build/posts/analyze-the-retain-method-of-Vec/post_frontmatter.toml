@@ -1,8 +1,0 @@
-title = 'Vec的retain方法分析'
-file_name = 'analyze-the-retain-method-of-Vec'
-description = '简单分析Rust中Vec的retain方法的实现'
-tags = ['Rust', 'Vec', 'retain']
-posted = '2025/09/23'
-estimated_reading_time = 12
-author = 'lhz07'
-order = 2

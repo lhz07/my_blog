@@ -1,0 +1,48 @@
+{% extends "base.html" %} {% block title %}lhz07's blog{% endblock title %} {%
+block content %}
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Friend Links - lhz07's Blog</title>
+    </head>
+
+    <body class="min-h-screen flex flex-col bg-gray-50 font-sans text-gray-800">
+        <!-- Main content -->
+        <main class="flex-1 container mx-auto px-6 py-10 md:max-w-3xl">
+            <h1 class="text-3xl font-bold text-center mb-8">友链</h1>
+
+            <div class="grid gap-6 sm:grid-cols-2">
+                <!-- Friend Card -->
+                {% for friend in friends %}
+                <a
+                    href="https://{{friend.url}}"
+                    target="_blank"
+                    class="group block p-6 rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition"
+                >
+                    <div class="flex items-center space-x-4">
+                        <img
+                            src="{{friend.img}}"
+                            alt="null"
+                            class="w-14 h-14 rounded-full border"
+                        />
+                        <div>
+                            <h2
+                                class="text-lg font-semibold group-hover:text-blue-600"
+                            >
+                                {{friend.name}}
+                            </h2>
+                            <p class="text-sm text-gray-600">
+                                {{friend.description}}
+                            </p>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </main>
+    </body>
+</html>
+
+{% endblock content %}

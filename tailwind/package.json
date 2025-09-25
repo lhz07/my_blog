@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch-css": "npx tailwindcss -i ./base.css -o ../static/css/index.css --watch",
-		"build-css-prod": "npx tailwindcss -i ./base.css -o ../static/css/index.css --minify"
+    "build-css-prod": "npx tailwindcss -i ./base.css -o ../static/css/index.css --minify"
   },
   "keywords": [],
   "author": "",

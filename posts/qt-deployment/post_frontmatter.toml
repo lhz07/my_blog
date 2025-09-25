@@ -1,0 +1,8 @@
+title = 'Qt 程序的打包部署'
+file_name = 'qt-deployment'
+description = '介绍如何将 Linux 上的 Qt 程序打包部署到其他 Linux 系统上运行'
+tags = ['Qt', 'Deployment', 'Linux']
+posted = '2025-09-25T19:17:53+08:00'
+estimated_reading_time = 15
+author = 'lhz07'
+cover_image = "/static/img/posts/qt-deployment/cover.webp"

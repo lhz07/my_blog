@@ -1,47 +1,43 @@
-use crate::errors::CatError;
-use actix_web::{HttpResponse, Responder, get, web};
+use crate::{
+    errors::{CatError, RespError},
+    timestamp::TimeStamp,
+};
+use actix_web::{HttpResponse, get, web};
 use ignore::{WalkBuilder, types::TypesBuilder};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use tera::Tera;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct FrontMatter {
     title: String,
     file_name: String,
     description: String,
-    posted: String,
+    posted: TimeStamp,
     tags: Vec<String>,
     author: String,
     estimated_reading_time: u32,
-    order: u32,
+    cover_image: Option<String>,
+}
+
+#[get("/favicon.ico")]
+pub async fn icon() -> Result<HttpResponse, RespError> {
+    let icon = fs::read("./static/img/favicon.ico").map_err(|_| RespError::NotFound)?;
+    println!("receive");
+    Ok(HttpResponse::Ok().content_type("image/x-icon").body(icon))
 }
 
 #[get("/")]
-pub async fn index(templates: web::Data<Tera>) -> impl Responder {
+pub async fn index(templates: web::Data<Tera>) -> Result<HttpResponse, RespError> {
     let mut context = tera::Context::new();
 
-    let mut frontmatters = match find_all_frontmatters() {
-        Ok(fm) => fm,
-        Err(e) => {
-            println!("{:?}", e);
-            return HttpResponse::InternalServerError()
-                .content_type("text/html")
-                .body("<p>Something went wrong!</p>");
-        }
-    };
-    frontmatters.sort_by(|a, b| b.order.cmp(&a.order));
-
+    let mut frontmatters = find_all_frontmatters().inspect_err(|e| eprintln!("{e}"))?;
+    frontmatters.sort_by(|a, b| b.posted.cmp(&a.posted));
+    // let frontmatters = frontmatters.into_iter().take(10).collect::<Vec<_>>();
     context.insert("posts", &frontmatters);
-    match templates.render("home.html", &context) {
-        Ok(s) => HttpResponse::Ok().content_type("text/html").body(s),
-        Err(e) => {
-            println!("{:?}", e);
-            HttpResponse::InternalServerError()
-                .content_type("text/html")
-                .body("<p>Something went wrong!</p>")
-        }
-    }
+    context.insert("page", "home");
+    let html = templates.render("home.html", &context)?;
+    Ok(HttpResponse::Ok().content_type("text/html").body(html))
 }
 
 fn find_all_frontmatters() -> Result<Vec<FrontMatter>, CatError> {

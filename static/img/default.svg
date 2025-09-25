@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90" width="160" height="90">
+  <!-- 背景框 -->
+  <rect x="0" y="0" width="160" height="90" rx="8" ry="8" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="2"/>
+
+  <!-- 中心图标 -->
+  <svg x="80" y="45" width="32" height="32" viewBox="0 0 32 32" fill="#9ca3af">
+    <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
+  </svg>
+</svg>

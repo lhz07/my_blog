@@ -10,7 +10,7 @@
 | **Beam** (Improved BFS)          | X            | ✔️                | ✔️       |
 ### Enqueue
 #### Example Queue
-![Image](/static/img/posts/search/Pasted%20image%2020250414170213.png)
+![Image](/static/img/posts/search/Pasted%20image%2020250414170213.webp)
 From **S** to **G** (Using DFS)
 ~~(S)~~
 ~~(S A)~~ (S B)
@@ -33,7 +33,7 @@ Consider how far we've gone so far
 2. Test first path in the queue
 
 
-![Image](/static/img/posts/search/Pasted%20image%2020250414182611.png)
+![Image](/static/img/posts/search/Pasted%20image%2020250414182611.webp)
 ####  Admissible Heuristic
 The heuristic estimate is guaranteed to be less than the actual distance
 

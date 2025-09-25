@@ -1,6 +1,6 @@
 document.querySelectorAll("pre").forEach((pre) => {
   const wrapper = document.createElement("div");
-  wrapper.className = "relative group";
+  wrapper.className = "code-group group";
   pre.parentNode.insertBefore(wrapper, pre);
   wrapper.appendChild(pre);
   const code = pre.querySelector("code");

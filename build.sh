@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 cd tailwind && npm run build-css-prod && cd -
 cargo build --release --target x86_64-unknown-linux-musl
 if [ -d "build" ]; then
@@ -6,6 +6,7 @@ if [ -d "build" ]; then
 fi
 mkdir build
 cp -r static build/static
+cp -r other_data build/other_data
 cp target/x86_64-unknown-linux-musl/release/my_blog build/my_blog
 cp -r templates build/templates
 cp -r posts build/posts

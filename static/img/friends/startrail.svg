@@ -1,0 +1,13 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- 外部粗黑边框圆（半径缩放到最大贴近画布边缘） -->
+  <circle cx="256" cy="256" r="252" fill="none" stroke="black" stroke-width="8"/>
+
+  <!-- 黑色圆（略大以填充空间） -->
+  <circle cx="256" cy="256" r="216" fill="black" />
+
+  <!-- 白色菱形（适配新尺寸，扩大比例） -->
+  <rect x="156" y="156" width="200" height="200" fill="white" transform="rotate(45 256 256)" />
+
+  <!-- 黑色菱形 -->
+  <rect x="196" y="196" width="120" height="120" fill="black" transform="rotate(45 256 256)" />
+</svg>
