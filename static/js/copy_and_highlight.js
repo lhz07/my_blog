@@ -20,3 +20,9 @@ document.querySelectorAll("pre").forEach((pre) => {
   pre.appendChild(button);
   hljs.highlightElement(code);
 });
+document.querySelectorAll("a[href]").forEach((a) => {
+  const url = a.getAttribute("href");
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    a.setAttribute("target", "_blank");
+  }
+});

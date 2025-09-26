@@ -4,11 +4,15 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum CatError {
     #[error("Toml parse error: {0}")]
-    Toml(#[from] toml::de::Error),
+    TomlDe(#[from] toml::de::Error),
+    #[error("Toml parse error: {0}")]
+    TomlSer(#[from] toml::ser::Error),
     #[error("IO error: {0}")]
     IO(#[from] std::io::Error),
     #[error("Toml file error: {0}")]
     Walker(#[from] ignore::Error),
+    #[error("Custom error: {0}")]
+    Custom(String),
 }
 
 #[derive(Debug, Error)]
@@ -17,12 +21,16 @@ pub enum RespError {
     NotFound,
     #[error("500 server internal error")]
     InternalServerError,
+    #[error("Custom error: {0}")]
+    Custom(String),
 }
 
 impl From<CatError> for RespError {
     fn from(err: CatError) -> Self {
         match err {
-            CatError::IO(_) | CatError::Toml(_) | CatError::Walker(_) => RespError::NotFound,
+            CatError::TomlDe(_) | CatError::Walker(_) => RespError::NotFound,
+            CatError::IO(_) | CatError::TomlSer(_) => RespError::InternalServerError,
+            CatError::Custom(s) => RespError::Custom(s),
         }
     }
 }
@@ -42,6 +50,9 @@ impl ResponseError for RespError {
             Self::InternalServerError => HttpResponse::InternalServerError()
                 .content_type("text/html")
                 .body("<p>Something went wrong!</p>"),
+            Self::Custom(s) => HttpResponse::InternalServerError()
+                .content_type("text/plain")
+                .body(s.clone()),
         }
     }
 }

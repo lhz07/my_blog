@@ -29,6 +29,10 @@ pub async fn post(
     options.extension.table = true;
     options.extension.cjk_friendly_emphasis = true;
     options.extension.strikethrough = true;
+    options.extension.footnotes = true;
+    options.extension.tasklist = true;
+    options.extension.underline = true;
+    options.extension.superscript = true;
     let md_text = extract_md(&post_name).inspect_err(|e| eprintln!("{e}"))?;
     let frontmatter = extract_frontmatter(&post_name).inspect_err(|e| eprintln!("{e}"))?;
 

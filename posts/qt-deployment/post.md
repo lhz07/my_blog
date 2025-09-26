@@ -1,4 +1,4 @@
-一直以来，Qt(pronounced as "cute", not "cu-tee") 程序的打包部署都相当困难，今天我们进行一些简单的尝试。
+一直以来，Qt[^1] 程序的打包部署都相当困难，今天我们进行一些简单的尝试。
 由于静态编译较复杂，且可能涉及违反 Qt 的 LGPL 协议问题，故仅介绍动态编译。
 Windows 和 macOS下都有官方提供的 windowsdeployqt 或 macdeployqt，一键部署还是比较方便的，但是 Linux 下官方没有提供类似的软件，可以尝试 [linuxdeployqt](https://github.com/probonopd/linuxdeployqt)，但是有两点限制：
 1. 不支持部署 Wayland 程序
@@ -114,3 +114,5 @@ Plugins = plugins                  # plugins文件夹的路径
 Prefix = ./                       # 下面的设置项的路径前缀
 Plugins = ../plugins                  # plugins文件夹的路径
 ```
+
+[^1]: Qt is pronounced as "cute", not "cu-tee" [https://wiki.qt.io/Qt_for_Beginners#Introduction_to_Qt](https://wiki.qt.io/Qt_for_Beginners#Introduction_to_Qt)

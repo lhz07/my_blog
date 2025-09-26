@@ -1,13 +1,13 @@
 [[friend]]
 name = "StarTrail"
-url = "startrails.site"
-description = "A personal blog of StarTrail"
+url = "https://startrails.site"
+description = "星轨前哨基地"
 # src="https://startrails.site/favicon.svg"
-img = "/static/img/friends/startrail.svg"
+avatar = "/static/img/friends/startrail.svg"
 
 [[friend]]
 name = "沉渊覆雪 - 繁华不复"
-url = "https://0o0.codebeg.page/"
+url = "https://0o0.codeberg.page"
 description = "愿走向深渊的旅途里可以遇见无限美好"
 # src="https://0o0.codeberg.page/img/avatar_hu_d4c2d797ac3a9b7.png
-img = "/static/img/friends/avatar_chen.webp"
+avatar = "/static/img/friends/avatar_chen.webp"

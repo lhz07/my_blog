@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* change default footnote return symbol*/
+.footnote-backref {
+    font-size: 0;
+}
+.footnote-backref::after {
+    content: "⏎";
+    font-size: 13px;
+}
+
 /* 代码块样式，带横向滚动和间距 */
 /* dark: bg-gray-800 */
 .markdown-body pre {

@@ -2,7 +2,6 @@ use crate::{
     errors::{CatError, RespError},
     timestamp::TimeStamp,
 };
-use actix_files::NamedFile;
 use actix_web::{HttpResponse, get, web};
 use ignore::{WalkBuilder, types::TypesBuilder};
 use serde::{Deserialize, Serialize};
@@ -19,11 +18,6 @@ pub struct FrontMatter {
     author: String,
     estimated_reading_time: u32,
     cover_image: Option<String>,
-}
-
-#[get("/favicon.ico")]
-pub async fn icon() -> Result<NamedFile, RespError> {
-    NamedFile::open("./static/img/favicon.ico").map_err(|_| RespError::NotFound)
 }
 
 #[get("/")]

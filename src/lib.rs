@@ -1,8 +1,7 @@
-use std::{io, net::TcpListener};
-
 use actix_files::Files;
 use actix_web::{App, HttpServer, dev::Server, middleware, web};
 use once_cell::sync::Lazy;
+use std::{io, net::TcpListener};
 use tera::Tera;
 
 pub mod errors;
@@ -30,8 +29,8 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, io::Error> {
             .service(handlers::index)
             .service(handlers::post)
             .service(handlers::friend_links)
+            .service(handlers::post_link)
             .service(handlers::about)
-            .service(handlers::icon)
     })
     .listen(listener)?
     .run();
