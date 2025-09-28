@@ -14,11 +14,13 @@ description = "A tool to download bangumi automatically from mikan"
 name = "GitHub"
 url = "https://github.com/lhz07"
 icon = "/static/img/github.svg"
+icon_dark = "/static/img/github_dark.svg"
 
 [[contact]]
 name = "Email"
 url = "mailto:a2722764368@gmail.com"
 icon = "/static/img/mail.svg"
+icon_dark = "/static/img/mail_dark.svg"
 
 [profile]
 subtitle = "A student who loves programming"

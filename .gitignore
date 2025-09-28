@@ -2,3 +2,4 @@
 /tailwind/node_modules
 .DS_Store
 /build
+/auto_builder

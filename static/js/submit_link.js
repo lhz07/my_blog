@@ -55,13 +55,15 @@ submitForm.addEventListener("submit", async (e) => {
     });
 
     if (response.ok) {
-      alert("友链申请已提交，我会尽快查看（大概）");
+      alert("友链申请已提交，我会尽快查看（大概)");
       closeModal();
     } else if (
       response.status === 500 &&
       response.headers.get("Content-Type") == "text/plain"
     ) {
       alert(`提交失败: ${await response.text()}\n请通过邮件联系我`);
+    } else {
+      throw new Error();
     }
   } catch (error) {
     alert("提交失败，请稍后重试或通过邮件联系我");

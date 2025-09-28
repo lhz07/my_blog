@@ -1,12 +1,12 @@
 一直以来，Qt[^1] 程序的打包部署都相当困难，今天我们进行一些简单的尝试。
 由于静态编译较复杂，且可能涉及违反 Qt 的 LGPL 协议问题，故仅介绍动态编译。
-Windows 和 macOS下都有官方提供的 windowsdeployqt 或 macdeployqt，一键部署还是比较方便的，但是 Linux 下官方没有提供类似的软件，可以尝试 [linuxdeployqt](https://github.com/probonopd/linuxdeployqt)，但是有两点限制：
+Windows 和 macOS 下都有官方提供的 windowsdeployqt 或 macdeployqt，一键部署还是比较方便的，但是 Linux 下官方没有提供类似的软件，可以尝试 [linuxdeployqt](https://github.com/probonopd/linuxdeployqt)，但是有两点限制：
 1. 不支持部署 Wayland 程序
-2. 必须使用当前仍受支持的最低 Ubuntu LTS进行部署
+2. 必须使用当前仍受支持的最低版本 Ubuntu LTS 进行部署
 
 所以我们还是来看看 Qt 官方的解决方案吧。
 #### 链接动态库
-根据 Qt 的官方文档[Qt for Linux/X11 - Deployment](https://doc.qt.io/qt-6/linux-deployment.html)，动态编译的主要困难在于如何让编译出来的可执行文件能够找到需要的动态链接库。在文档中列举了三种方法：
+根据 Qt 的官方文档 [Qt for Linux/X11 - Deployment](https://doc.qt.io/qt-6/linux-deployment.html)，动态编译的主要困难在于如何让编译出来的可执行文件能够找到需要的动态链接库。在文档中列举了三种方法：
 1. Install the Qt libraries in one of the system library paths (e.g. `/usr/lib` on most systems).
 2. Pass a predetermined path to the `-rpath` command-line option when linking the application. This will tell the dynamic linker to look in this directory when starting your application.
 3. You can write a startup script for your application, where you modify the dynamic linker configuration (e.g., adding your application's directory to the `LD_LIBRARY_PATH` environment variable).
@@ -26,7 +26,7 @@ Windows 和 macOS下都有官方提供的 windowsdeployqt 或 macdeployqt，一�
 
 对于不同的 GNU/Linux 发行版，它们可能包含在不同的软件包中。
 
-首先使用`ldd ./application` 命令查找程序依赖，其中的`application`参数可以是可执行文件，也可以是动态库，对于 wayland 程序，我们主要是查找程序本身的依赖，以及`libqwayland-generic.so`(这是什么？请看插件一节) 的依赖。并将所需依赖复制到`lib`文件夹中去（假设我们的目录结构分为`bin`、`lib`、`plugins`三个文件夹）。
+首先使用 `ldd ./application` 命令查找程序依赖，其中的`application`参数可以是可执行文件，也可以是动态库，对于 Wayland 程序，我们主要是查找程序本身的依赖，以及`libqwayland-generic.so`(这是什么？请看插件一节) 的依赖。并将所需依赖复制到`lib`文件夹中去（假设我们的目录结构分为`bin`、`lib`、`plugins`三个文件夹）。
 这里可以使用一个脚本来帮我们快速地复制这些动态库。
 ```bash
 #!/bin/bash

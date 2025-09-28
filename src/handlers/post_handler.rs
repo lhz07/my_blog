@@ -1,4 +1,5 @@
 use crate::{
+    CONTEXT,
     errors::{CatError, RespError},
     handlers::home_handler::FrontMatter,
 };
@@ -23,7 +24,7 @@ pub async fn post(
     templates: web::Data<Tera>,
     post_name: web::Path<String>,
 ) -> Result<HttpResponse, RespError> {
-    let mut context = tera::Context::new();
+    let mut context = CONTEXT.clone();
     let mut options = Options::default();
     options.render.hardbreaks = true;
     options.extension.table = true;

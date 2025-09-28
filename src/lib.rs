@@ -20,6 +20,19 @@ pub static TEMPLATES: Lazy<Tera> = Lazy::new(|| {
     tera
 });
 
+pub static CONTEXT: Lazy<tera::Context> = Lazy::new(|| {
+    #[cfg(debug_assertions)]
+    {
+        let mut context = tera::Context::new();
+        context.insert("debug_mode", &true);
+        context
+    }
+    #[cfg(not(debug_assertions))]
+    {
+        tera::Context::new()
+    }
+});
+
 pub fn start_blog(listener: TcpListener) -> Result<Server, io::Error> {
     let server = HttpServer::new(move || {
         App::new()

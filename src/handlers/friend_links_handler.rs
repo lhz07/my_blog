@@ -5,7 +5,10 @@ use sha1::Digest;
 use std::fs;
 use tera::Tera;
 
-use crate::errors::{CatError, RespError};
+use crate::{
+    CONTEXT,
+    errors::{CatError, RespError},
+};
 
 #[derive(Deserialize, Serialize)]
 struct Friend {
@@ -37,7 +40,7 @@ fn extract_friend_links() -> Result<Vec<Friend>, CatError> {
 
 #[get("/friend_links")]
 pub async fn friend_links(templates: web::Data<Tera>) -> Result<HttpResponse, RespError> {
-    let mut context = tera::Context::new();
+    let mut context = CONTEXT.clone();
     let friends = extract_friend_links().inspect_err(|e| eprintln!("{e}"))?;
     context.insert("page", "friend_links");
     context.insert("friends", &friends);

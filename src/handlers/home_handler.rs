@@ -1,4 +1,5 @@
 use crate::{
+    CONTEXT,
     errors::{CatError, RespError},
     timestamp::TimeStamp,
 };
@@ -22,7 +23,7 @@ pub struct FrontMatter {
 
 #[get("/")]
 pub async fn index(templates: web::Data<Tera>) -> Result<HttpResponse, RespError> {
-    let mut context = tera::Context::new();
+    let mut context = CONTEXT.clone();
 
     let mut frontmatters = find_all_frontmatters().inspect_err(|e| eprintln!("{e}"))?;
     frontmatters.sort_by(|a, b| b.posted.cmp(&a.posted));

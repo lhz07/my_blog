@@ -1,4 +1,7 @@
-use crate::errors::{CatError, RespError};
+use crate::{
+    CONTEXT,
+    errors::{CatError, RespError},
+};
 use actix_web::{HttpResponse, get, web};
 use serde::{Deserialize, Serialize};
 use tera::Tera;
@@ -8,6 +11,7 @@ struct Contact {
     name: String,
     url: String,
     icon: String,
+    icon_dark: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -40,7 +44,7 @@ fn extract_about() -> Result<AboutInfo, CatError> {
 
 #[get("/about")]
 pub async fn about(templates: web::Data<Tera>) -> Result<HttpResponse, RespError> {
-    let mut context = tera::Context::new();
+    let mut context = CONTEXT.clone();
     let about_info = extract_about().inspect_err(|e| eprintln!("{e}"))?;
     context.insert("page", "about");
     context.insert("repos", &about_info.repo);
