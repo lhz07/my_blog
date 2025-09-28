@@ -8,6 +8,7 @@
       window.location.reload(true);
     };
   </script>
+  {% endif %}
   <script>
     let isDark = sessionStorage.getItem("is_dark_theme");
     if (isDark === null) {
@@ -57,7 +58,6 @@
       }
     });
   </script>
-  {% endif %}
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
