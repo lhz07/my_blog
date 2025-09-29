@@ -34,7 +34,10 @@ pub async fn post(
     options.extension.tasklist = true;
     options.extension.underline = true;
     options.extension.superscript = true;
-    let md_text = extract_md(&post_name).inspect_err(|e| eprintln!("{e}"))?;
+    let md_text = extract_md(&post_name).map_err(|e| {
+        eprintln!("{e}");
+        RespError::NotFound
+    })?;
     let frontmatter = extract_frontmatter(&post_name).inspect_err(|e| eprintln!("{e}"))?;
 
     let md_html = comrak::markdown_to_html(&md_text, &options);

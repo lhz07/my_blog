@@ -1,6 +1,8 @@
 use actix_web::{HttpResponse, ResponseError};
 use thiserror::Error;
 
+use crate::not_found_page;
+
 #[derive(Debug, Error)]
 pub enum CatError {
     #[error("Toml parse error: {0}")]
@@ -44,9 +46,11 @@ impl From<tera::Error> for RespError {
 impl ResponseError for RespError {
     fn error_response(&self) -> actix_web::HttpResponse<actix_web::body::BoxBody> {
         match self {
-            Self::NotFound => HttpResponse::NotFound()
-                .content_type("text/html")
-                .body("<p>Not found!</p>"),
+            Self::NotFound => not_found_page().unwrap_or(
+                HttpResponse::NotFound()
+                    .content_type("text/html")
+                    .body("<p>Not found!</p>"),
+            ),
             Self::InternalServerError => HttpResponse::InternalServerError()
                 .content_type("text/html")
                 .body("<p>Something went wrong!</p>"),

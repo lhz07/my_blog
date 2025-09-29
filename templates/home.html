@@ -120,6 +120,28 @@ block content %}
         </a>
         {% endfor %}
       </div>
+      <div class="mt-14 flex items-center space-x-6 justify-center">
+        <a
+          href="{% if current_page > 1 %}/pages/{{current_page - 1}}{% endif %}"
+          class="page-btn{% if current_page == 1 %} disabled{% endif %}"
+        >
+          Prev
+        </a>
+        {% for page in range(start=1, end=page_count+1) %}
+        <a
+          class="w-10 h-10 {% if page == current_page %}text-blue-600 dark:text-blue-300{% else %}dark:text-slate-100 text-gray-600{% endif %} inline-flex items-center justify-center text-sm font-medium dark:border-0 dark:bg-slate-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-800 hover:shadow-md dark:hover:text-white dark:hover:bg-slate-500 transition duration-200 shadow-sm"
+          href="/pages/{{page}}"
+        >
+          {{page}}
+        </a>
+        {% endfor %}
+        <a
+          href="{% if current_page < page_count %}/pages/{{current_page + 1}}{% endif %}"
+          class="page-btn{% if current_page >= page_count %} disabled{% endif %}"
+        >
+          Next
+        </a>
+      </div>
     </main>
   </body>
 </html>

@@ -21,6 +21,7 @@
       document.documentElement.classList.add("dark");
     }
   </script>
+  {% block theme_button %}
   <script type="module">
     const themeToggleBtn = document.getElementById("theme-toggle");
     const sun = document.getElementById("icon-sun");
@@ -58,6 +59,7 @@
       }
     });
   </script>
+  {% endblock theme_button %}
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

@@ -1,8 +1,11 @@
 use actix_files::Files;
-use actix_web::{App, HttpServer, dev::Server, middleware, web};
+use actix_web::{App, HttpResponse, HttpServer, dev::Server, middleware, web};
 use once_cell::sync::Lazy;
-use std::{io, net::TcpListener};
+use rand::seq::IndexedRandom;
+use std::{fs, io, net::TcpListener, path::PathBuf};
 use tera::Tera;
+
+use crate::errors::{CatError, RespError};
 
 pub mod errors;
 pub mod handlers;
@@ -33,13 +36,42 @@ pub static CONTEXT: Lazy<tera::Context> = Lazy::new(|| {
     }
 });
 
+#[inline(always)]
+async fn not_found_handler() -> Result<HttpResponse, RespError> {
+    not_found_page()
+}
+
+fn not_found_page() -> Result<HttpResponse, RespError> {
+    let mut context = CONTEXT.clone();
+    context.insert("page", "not_found");
+    let random_file = || -> Result<Vec<PathBuf>, CatError> {
+        let mut stickers = Vec::new();
+        for entry in fs::read_dir("./static/img/stickers")? {
+            stickers.push(entry?.path());
+        }
+        Ok(stickers)
+    };
+    let stickers = random_file()?;
+    let sticker = stickers
+        .choose(&mut rand::rng())
+        .and_then(|p| p.file_name())
+        .ok_or(RespError::InternalServerError)?;
+    context.insert("sticker", sticker.to_string_lossy().as_ref());
+    let html = TEMPLATES.render("not_found.html", &context)?;
+    Ok(HttpResponse::NotFound()
+        .content_type("text/html")
+        .body(html))
+}
+
 pub fn start_blog(listener: TcpListener) -> Result<Server, io::Error> {
     let server = HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(TEMPLATES.clone()))
+            .default_service(web::route().to(not_found_handler))
             .service(Files::new("/static", "static/").use_last_modified(true))
             .wrap(middleware::Logger::default())
             .service(handlers::index)
+            .service(handlers::page)
             .service(handlers::post)
             .service(handlers::friend_links)
             .service(handlers::post_link)
