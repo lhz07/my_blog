@@ -74,7 +74,7 @@ fn write_friend_request(value: &FriendRequest) -> Result<(), CatError> {
     if !fs::exists(dir)? {
         fs::create_dir(dir)?;
     } else if count_files(dir)? > 1000 {
-        return Err(CatError::Custom("Too many friend requests".to_string()));
+        return Err(CatError::custom("Too many friend requests"));
     }
     fs::write(format!("../friend_requests/{file_name}.toml"), content).inspect_err(|e| {
         eprintln!("{e}");

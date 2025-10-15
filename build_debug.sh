@@ -1,2 +1,2 @@
 cd tailwind && npm run build-css-prod && cd -
-cargo build
+cargo build --bin my_blog

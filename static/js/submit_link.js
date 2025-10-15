@@ -45,7 +45,7 @@ submitForm.addEventListener("submit", async (e) => {
     submitButton.textContent = "提交中...";
     submitButton.disabled = true;
 
-    // Send request to your backend
+    // Send request to the backend
     const response = await fetch("/api/friend-link", {
       method: "POST",
       headers: {

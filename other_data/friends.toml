@@ -11,3 +11,10 @@ url = "https://0o0.codeberg.page"
 description = "愿走向深渊的旅途里可以遇见无限美好"
 # src="https://0o0.codeberg.page/img/avatar_hu_d4c2d797ac3a9b7.png
 avatar = "/static/img/friends/avatar_chen.webp"
+
+[[friend]]
+name = "A Moment's Rest"
+url = "https://a-moment096.github.io"
+# src="https://a-moment096.github.io/avatar.jpg"
+avatar = "/static/img/friends/avatar_a moment.webp"
+description = "AMoment 的 Blog"

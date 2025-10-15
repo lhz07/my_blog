@@ -1,5 +1,10 @@
 use actix_files::Files;
-use actix_web::{App, HttpResponse, HttpServer, dev::Server, middleware, web};
+use actix_web::{
+    App, HttpResponse, HttpServer,
+    dev::Server,
+    middleware::{self, Compress},
+    web,
+};
 use once_cell::sync::Lazy;
 use rand::seq::IndexedRandom;
 use std::{fs, io, net::TcpListener, path::PathBuf};
@@ -9,19 +14,22 @@ use crate::errors::{CatError, RespError};
 
 pub mod errors;
 pub mod handlers;
+pub mod search;
 pub mod timestamp;
 
-pub static TEMPLATES: Lazy<Tera> = Lazy::new(|| {
-    let mut tera = match Tera::new("templates/**/*.html") {
-        Ok(t) => t,
-        Err(e) => {
-            println!("Parsing error(s): {}", e);
-            std::process::exit(1);
-        }
+lazy_static::lazy_static! {
+    pub static ref TEMPLATES: Tera = {
+        let mut tera = match Tera::new("templates/**/*.html") {
+            Ok(t) => t,
+            Err(e) => {
+                println!("Parsing error(s): {}", e);
+                std::process::exit(1);
+            }
+        };
+        tera.autoescape_on(vec!["html", ".sql"]);
+        tera
     };
-    tera.autoescape_on(vec!["html", ".sql"]);
-    tera
-});
+}
 
 pub static CONTEXT: Lazy<tera::Context> = Lazy::new(|| {
     #[cfg(debug_assertions)]
@@ -34,6 +42,19 @@ pub static CONTEXT: Lazy<tera::Context> = Lazy::new(|| {
     {
         tera::Context::new()
     }
+});
+
+pub static MD_OPTIONS: Lazy<comrak::Options> = Lazy::new(|| {
+    let mut options = comrak::Options::default();
+    options.render.hardbreaks = true;
+    options.extension.table = true;
+    options.extension.cjk_friendly_emphasis = true;
+    options.extension.strikethrough = true;
+    options.extension.footnotes = true;
+    options.extension.tasklist = true;
+    options.extension.underline = true;
+    options.extension.superscript = true;
+    options
 });
 
 #[inline(always)]
@@ -70,9 +91,12 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, io::Error> {
             .default_service(web::route().to(not_found_handler))
             .service(Files::new("/static", "static/").use_last_modified(true))
             .wrap(middleware::Logger::default())
+            .wrap(Compress::default())
             .service(handlers::index)
             .service(handlers::page)
             .service(handlers::post)
+            .service(handlers::search)
+            .service(handlers::search_lucky)
             .service(handlers::friend_links)
             .service(handlers::post_link)
             .service(handlers::about)

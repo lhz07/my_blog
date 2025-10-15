@@ -2,7 +2,7 @@ use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize, Default)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize, Default, Debug)]
 pub struct TimeStamp(DateTime<FixedOffset>);
 
 impl fmt::Display for TimeStamp {

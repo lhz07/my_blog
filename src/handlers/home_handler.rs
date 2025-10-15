@@ -11,16 +11,16 @@ use tera::Tera;
 
 const POSTS_PER_PAGE: usize = 5;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct FrontMatter {
-    title: String,
-    file_name: String,
-    description: String,
-    posted: TimeStamp,
-    tags: Vec<String>,
-    author: String,
-    estimated_reading_time: u32,
-    cover_image: Option<String>,
+    pub title: String,
+    pub file_name: String,
+    pub description: String,
+    pub posted: TimeStamp,
+    pub tags: Vec<String>,
+    pub author: String,
+    pub estimated_reading_time: u32,
+    pub cover_image: Option<String>,
 }
 
 #[get("/")]
@@ -68,7 +68,7 @@ pub async fn page(
     Ok(HttpResponse::Ok().content_type("text/html").body(html))
 }
 
-fn find_all_frontmatters() -> Result<Vec<FrontMatter>, CatError> {
+pub fn find_all_frontmatters() -> Result<Vec<FrontMatter>, CatError> {
     let mut t = TypesBuilder::new();
     t.add_defaults();
     let toml = t.select("toml").build().unwrap();

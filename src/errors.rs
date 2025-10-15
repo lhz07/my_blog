@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use actix_web::{HttpResponse, ResponseError};
 use thiserror::Error;
 
@@ -13,8 +15,21 @@ pub enum CatError {
     IO(#[from] std::io::Error),
     #[error("Toml file error: {0}")]
     Walker(#[from] ignore::Error),
+    #[error("Tantivy error: {0}")]
+    Search(#[from] tantivy::TantivyError),
+    #[error("Internal error: {0}")]
+    Internal(Cow<'static, str>),
     #[error("Custom error: {0}")]
-    Custom(String),
+    Custom(Cow<'static, str>),
+}
+
+impl CatError {
+    pub fn internal<S: Into<Cow<'static, str>>>(s: S) -> Self {
+        CatError::Internal(s.into())
+    }
+    pub fn custom<S: Into<Cow<'static, str>>>(s: S) -> Self {
+        CatError::Custom(s.into())
+    }
 }
 
 #[derive(Debug, Error)]
@@ -24,14 +39,17 @@ pub enum RespError {
     #[error("500 server internal error")]
     InternalServerError,
     #[error("Custom error: {0}")]
-    Custom(String),
+    Custom(Cow<'static, str>),
 }
 
 impl From<CatError> for RespError {
     fn from(err: CatError) -> Self {
         match err {
             CatError::TomlDe(_) | CatError::Walker(_) => RespError::NotFound,
-            CatError::IO(_) | CatError::TomlSer(_) => RespError::InternalServerError,
+            CatError::IO(_)
+            | CatError::TomlSer(_)
+            | CatError::Search(_)
+            | CatError::Internal(_) => RespError::InternalServerError,
             CatError::Custom(s) => RespError::Custom(s),
         }
     }

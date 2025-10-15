@@ -1,0 +1,189 @@
+{% extends "base.html" %} {% block title %}Search - lhz07's blog{% endblock
+title %} {% block scripts %}
+<script src="/static/js/manage_tags.js" type="module"></script>
+{% endblock scripts %} {% macro render_result(fm, snippet, padding) %}
+<a
+  href="/posts/{{fm.file_name}}"
+  class="group block p-6 rounded-2xl border border-gray-200 bg-white dark:bg-slate-600 dark:border-0 shadow-sm hover:shadow-md transition duration-200"
+>
+  <div class="flex items-center space-x-6">
+    <!-- Article -->
+    <div class="flex-1 min-w-0">
+      <h2
+        class="text-2xl font-semibold dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 mb-2 transition duration-200"
+      >
+        {{fm.title}}
+      </h2>
+      <!-- Article summary -->
+      <p class="text-gray-600 dark:text-slate-200 snippet">
+        {{ padding }}{{snippet | safe}}{{ padding }}
+      </p>
+    </div>
+  </div>
+</a>
+{% endmacro %} {% block content %} {% set show_result = (search_result is
+defined) or (tag_result is defined) %} {% set has_result = (search_result or
+tag_result) %}
+<!-- Main content -->
+<main
+  class="flex-col flex container mx-auto {% if not show_result %}mt-[10vh] md:mt-[15vh]{% endif %} px-6 py-10"
+  style="max-width: 44rem"
+>
+  <div class="text-center mb-10 {% if show_result %}hidden{% endif %}">
+    <h1 class="text-3xl font-bold mb-4 dark:text-slate-200">搜索</h1>
+  </div>
+  <!-- Search Box -->
+  <div class="flex flex-col space-y-4 mb-8">
+    <form
+      id="searchForm"
+      class="flex {% if show_result %}flex-row{% else %}flex-col space-y-4{% endif %} items-center justify-center"
+    >
+      <input
+        type="text"
+        id="searchInput"
+        name="q"
+        class="w-full px-4 py-2 border border-gray-300 rounded-xl dark:text-slate-200 dark:bg-slate-600 dark:border-slate-400 focus:outline-none focus:shadow-md hover:shadow-md transition"
+        placeholder="输入关键词..."
+        value="{% if query %}{{query}}{% endif %}"
+      />
+      <div class="flex flex-row">
+        <button
+          type="submit"
+          class="{% if show_result %} ml-2 {% endif %}py-2 px-2 text-base font-medium text-gray-600 bg-white dark:bg-slate-500 dark:text-slate-100 dark:border-0 border border-gray-200 rounded-xl hover:text-gray-800 hover:shadow-md dark:hover:text-slate-50 transition-all duration-200 shadow-sm whitespace-nowrap"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="24px"
+            viewBox="0 -960 960 960"
+            width="24px"
+            fill="currentColor"
+          >
+            <path
+              d="M380-320q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l224 224q11 11 11 28t-11 28q-11 11-28 11t-28-11L532-372q-30 24-69 38t-83 14Zm0-80q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"
+            />
+          </svg>
+        </button>
+        <button
+          type="submit"
+          formaction="/lucky"
+          class="{% if show_result %}hidden {% endif %}md:px-4 py-2 px-3 ml-2 text-base font-medium text-gray-600 bg-white dark:bg-slate-500 dark:text-slate-100 dark:border-0 border border-gray-200 rounded-xl hover:text-gray-800 hover:shadow-md dark:hover:text-slate-50 transition-all duration-200 shadow-sm whitespace-nowrap"
+        >
+          I'm Feeling Lucky
+        </button>
+        <div class="relative">
+          <!-- Toggle Tag Sidebar Button -->
+          <button
+            type="button"
+            id="toggleTagBtn"
+            class="py-2 px-2 ml-2 text-base font-medium text-gray-600 bg-white dark:bg-slate-500 dark:text-slate-100 dark:border-0 border border-gray-200 rounded-xl hover:text-gray-800 hover:shadow-md dark:hover:text-slate-50 transition-all duration-200 shadow-sm whitespace-nowrap"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="currentColor"
+            >
+              <path
+                d="m360-320-33 131q-3 13-13 21t-24 8q-19 0-31-15t-7-33l28-112H171q-20 0-32-15.5t-7-34.5q3-14 14-22t25-8h129l40-160H231q-20 0-32-15.5t-7-34.5q3-14 14-22t25-8h129l33-131q3-13 13-21t24-8q19 0 31 15t7 33l-28 112h160l33-131q3-13 13-21t24-8q19 0 31 15t7 33l-28 112h109q20 0 32 15.5t7 34.5q-3 14-14 22t-25 8H660l-40 160h109q20 0 32 15.5t7 34.5q-3 14-14 22t-25 8H600l-33 131q-3 13-13 21t-24 8q-19 0-31-15t-7-33l28-112H360Zm20-80h160l40-160H420l-40 160Z"
+              />
+            </svg>
+          </button>
+          <!-- Popover Panel -->
+          <div
+            id="tagPopover"
+            class="absolute right-0 mt-4 -translate-y-20 translate-x-12 transform w-52 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-2xl shadow-xl transition-all duration-200 scale-50 opacity-0 pointer-events-none z-10"
+          >
+            <!-- Arrow -->
+            <div
+              class="absolute -top-[9px] right-5 w-4 h-4 rotate-45 bg-white dark:bg-slate-700 border-l border-t border-gray-200 dark:border-slate-600"
+            ></div>
+
+            <!-- Tag Search -->
+            <div
+              class="flex flex-row p-3 border-b border-gray-200 dark:border-slate-600"
+            >
+              <input
+                type="text"
+                id="tagSearch"
+                placeholder="搜索标签..."
+                class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-slate-500 dark:bg-slate-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              <button
+                type="button"
+                id="clearBtn"
+                class="md:ml-3 md:px-2 py-2 px-3 ml-2 text-sm text-gray-600 bg-white dark:bg-slate-500 dark:text-slate-100 dark:border-0 border border-gray-200 rounded-xl hover:text-gray-800 hover:shadow-md dark:hover:text-slate-50 transition-all duration-200 shadow-sm whitespace-nowrap"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="24px"
+                  viewBox="0 -960 960 960"
+                  width="24px"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M280-120q-33 0-56.5-23.5T200-200v-520q-17 0-28.5-11.5T160-760q0-17 11.5-28.5T200-800h160q0-17 11.5-28.5T400-840h160q17 0 28.5 11.5T600-800h160q17 0 28.5 11.5T800-760q0 17-11.5 28.5T760-720v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM400-280q17 0 28.5-11.5T440-320v-280q0-17-11.5-28.5T400-640q-17 0-28.5 11.5T360-600v280q0 17 11.5 28.5T400-280Zm160 0q17 0 28.5-11.5T600-320v-280q0-17-11.5-28.5T560-640q-17 0-28.5 11.5T520-600v280q0 17 11.5 28.5T560-280ZM280-720v520-520Z"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Tag List -->
+            <div
+              id="tagBar"
+              class="p-3 flex flex-wrap gap-2 max-h-60 overflow-y-auto"
+            >
+              {% for tag in all_tags %}
+              <button
+                type="button"
+                data-tag="{{tag}}"
+                class="text-sm px-3 py-1 rounded-full border bg-white hover:bg-gray-100{% if selected_tags and tag | lower in selected_tags %} active{% endif %}"
+              >
+                {{ tag }}
+              </button>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <!-- Search Results -->
+  {% if has_result %}
+  <p class="mb-4 text-gray-700 dark:text-slate-200">
+    找到 {{matched_count}} 条结果（{{time_cost}} 秒）
+  </p>
+  <div class="space-y-6">
+    {% if search_result %} {% for res in search_result %} {{
+    self::render_result(fm=res.fm, snippet=res.snippet, padding="...") }} {%
+    endfor %} {% else %} {% for fm in tag_result %} {{
+    self::render_result(fm=fm, snippet=fm.description, padding="") }} {% endfor
+    %} {% endif %}
+  </div>
+  <div class="mt-14 flex items-center space-x-6 justify-center">
+    <a
+      href="{% if current_page > 1 %}/pages/{{current_page - 1}}{% endif %}"
+      class="page-btn{% if current_page == 1 %} disabled{% endif %}"
+    >
+      Prev
+    </a>
+    {% for page in range(start=1, end=page_count+1) %}
+    <a
+      class="w-10 h-10 {% if page == current_page %}text-blue-600 dark:text-blue-300{% else %}dark:text-slate-100 text-gray-600{% endif %} inline-flex items-center justify-center text-sm font-medium dark:border-0 dark:bg-slate-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-800 hover:shadow-md dark:hover:text-white dark:hover:bg-slate-500 transition duration-200 shadow-sm"
+      href="/pages/{{page}}"
+    >
+      {{page}}
+    </a>
+    {% endfor %}
+    <a
+      href="{% if current_page < page_count %}/pages/{{current_page + 1}}{% endif %}"
+      class="page-btn{% if current_page >= page_count %} disabled{% endif %}"
+    >
+      Next
+    </a>
+  </div>
+  {% elif show_result %}
+  <p class="text-gray-700 dark:text-slate-200">未找到相关结果</p>
+  {% endif %}
+</main>
+{% endblock content %}

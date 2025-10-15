@@ -20,9 +20,14 @@ document.querySelectorAll("pre").forEach((pre) => {
   pre.appendChild(button);
   hljs.highlightElement(code);
 });
-document.querySelectorAll("a[href]").forEach((a) => {
+document.querySelectorAll(".markdown-body a[href]").forEach((a) => {
   const url = a.getAttribute("href");
   if (url.startsWith("http://") || url.startsWith("https://")) {
     a.setAttribute("target", "_blank");
   }
+});
+document.querySelectorAll("pre code").forEach((block) => {
+  const html = block.innerHTML.trimEnd();
+  const lines = html.split(/\r?\n/);
+  block.innerHTML = lines.map((line) => `<div>${line || " "}</div>`).join("");
 });
