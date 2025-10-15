@@ -1,7 +1,7 @@
 use crate::{
     errors::CatError,
     handlers::{home_handler::find_all_frontmatters, post_handler::extract_md},
-    search::{
+    search_utils::{
         INDEX_DIR,
         cleaner::{md_to_plain, preprocess_text},
         jieba::JIEBA_ANALYZER,

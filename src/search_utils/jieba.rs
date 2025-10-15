@@ -4,7 +4,7 @@ use tantivy::tokenizer::{
     Tokenizer,
 };
 
-use crate::search::STOP_WORD_FILTER_ZH;
+use crate::search_utils::STOP_WORD_FILTER_ZH;
 
 pub trait JiebaTokenize {
     fn basic_tokenize<'a>(words: Vec<&'a str>) -> Vec<jieba_rs::Token<'a>> {
@@ -110,7 +110,7 @@ impl JiebaTokenizer {
     }
 }
 
-pub static JIEBA: Lazy<jieba_rs::Jieba> = Lazy::new(|| jieba_rs::Jieba::new());
+pub static JIEBA: Lazy<jieba_rs::Jieba> = Lazy::new(jieba_rs::Jieba::new);
 
 pub static JIEBA_ANALYZER: Lazy<TextAnalyzer> = Lazy::new(|| {
     tantivy::tokenizer::TextAnalyzer::builder(JiebaTokenizer::with_mode(JiebaMode::CutAll))

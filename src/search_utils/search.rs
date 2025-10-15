@@ -1,7 +1,7 @@
 use crate::{
     errors::CatError,
     handlers::{home_handler::FrontMatter, post_handler::extract_frontmatter},
-    search::{
+    search_utils::{
         INDEX_DIR, STOP_WORD_FILTER_ZH,
         jieba::{self, JIEBA_ANALYZER},
     },
@@ -225,7 +225,7 @@ pub async fn search_index(
             let snippet_zh = zh_gen.snippet(text_zh);
             println!("Snippet gen took: {:?}", ins.elapsed());
 
-            let fm = extract_frontmatter(&file_name)?;
+            let fm = extract_frontmatter(file_name)?;
             let res = SearchTerm {
                 score,
                 fm,

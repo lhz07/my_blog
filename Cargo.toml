@@ -5,7 +5,7 @@ edition = "2024"
 
 [[bin]]
 name = "index"
-path = "src/search/main.rs"
+path = "src/search_utils/main.rs"
 
 [dependencies]
 tera = "1"

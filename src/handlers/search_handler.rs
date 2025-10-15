@@ -1,8 +1,8 @@
 use crate::{
     CONTEXT,
     errors::RespError,
-    handlers::home_handler::{FrontMatter, find_all_frontmatters},
-    search::search::{SearchTerm, search_index, search_tags},
+    handlers::home_handler::find_all_frontmatters,
+    search_utils::search::{search_index, search_tags},
 };
 use actix_web::{HttpResponse, get, web};
 use once_cell::sync::Lazy;
@@ -53,39 +53,6 @@ where
     }
 }
 
-trait Fm {
-    fn fm(&self) -> &FrontMatter;
-}
-
-impl Fm for SearchTerm {
-    fn fm(&self) -> &FrontMatter {
-        &self.fm
-    }
-}
-
-impl Fm for FrontMatter {
-    fn fm(&self) -> &FrontMatter {
-        self
-    }
-}
-
-fn filter_tags<T>(tags: &HashSet<String>, fm: Vec<T>) -> Vec<T>
-where
-    T: Fm,
-{
-    fm.into_iter()
-        .filter(|fm| {
-            let fm_tags = fm
-                .fm()
-                .tags
-                .iter()
-                .map(|t| t.to_lowercase())
-                .collect::<HashSet<_>>();
-            tags.is_subset(&fm_tags)
-        })
-        .collect()
-}
-
 static ALL_TAGS: Lazy<Vec<String>> = Lazy::new(|| {
     let frontmatters = find_all_frontmatters().unwrap();
     let mut tags = HashSet::new();
@@ -93,7 +60,7 @@ static ALL_TAGS: Lazy<Vec<String>> = Lazy::new(|| {
         tags.extend(fm.tags);
     }
     let mut tags = tags.into_iter().collect::<Vec<_>>();
-    tags.sort_by(|t1, t2| t1.to_lowercase().cmp(&t2.to_lowercase()));
+    tags.sort_by_key(|t| t.to_lowercase());
     tags
 });
 

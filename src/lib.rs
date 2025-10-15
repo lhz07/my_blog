@@ -14,7 +14,7 @@ use crate::errors::{CatError, RespError};
 
 pub mod errors;
 pub mod handlers;
-pub mod search;
+pub mod search_utils;
 pub mod timestamp;
 
 lazy_static::lazy_static! {
