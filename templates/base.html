@@ -21,6 +21,28 @@
       document.documentElement.classList.add("dark");
     }
   </script>
+  <script type="module">
+    const hamburgerToggleBtn = document.getElementById("hamburger-toggle");
+    const menuIconLines = hamburgerToggleBtn.querySelectorAll("svg > line");
+    const overLay = document.getElementById("navOverlay");
+    const nav = overLay.querySelector("nav");
+    hamburgerToggleBtn.addEventListener("click", () => {
+      menuIconLines[0].classList.toggle("-rotate-45");
+      menuIconLines[1].classList.toggle("scale-x-[0]");
+      menuIconLines[2].classList.toggle("rotate-45");
+      overLay.classList.toggle("opacity-0");
+      overLay.classList.toggle("pointer-events-none");
+      nav.classList.toggle("-translate-y-40");
+      nav.classList.toggle("opacity-0");
+      document.body.classList.toggle("overflow-hidden");
+    });
+    // Close overlay with Escape key
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !overLay.classList.contains("opacity-0")) {
+        hamburgerToggleBtn.click();
+      }
+    });
+  </script>
   {% block theme_button %}
   <script type="module">
     const themeToggleBtn = document.getElementById("theme-toggle");
@@ -71,10 +93,44 @@
     <link rel="icon" type="image/png" href="/static/img/avatar.png" />
   </head>
   {% block header %}
+  <div
+    id="navOverlay"
+    class="fixed inset-0 bg-white dark:bg-slate-700 dark:bg-opacity-40 bg-opacity-40 backdrop-blur-md z-50 opacity-0 flex pointer-events-none items-center justify-center p-4 transition-all duration-500"
+  >
+    <nav
+      class="flex flex-col gap-8 text-lg font-medium -translate-y-40 opacity-0 transition-all duration-500"
+    >
+      <a
+        href="/"
+        class="transition-colors duration-200 {% if page == 'home' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
+        >Home</a
+      >
+      <a
+        href="/search"
+        class="transition-colors duration-200 {% if page == 'search' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
+        >Search</a
+      >
+      <a
+        href="/about"
+        class="transition-colors duration-200 {% if page == 'about' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
+        >About</a
+      >
+      <a
+        href="/friend_links"
+        class="transition-colors duration-200 {% if page == 'friend_links' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
+        >Friend Links</a
+      >
+    </nav>
+  </div>
   <header
     class="h-16 flex items-center justify-center shadow-sm bg-white dark:bg-slate-700"
   >
-    <nav class="flex space-x-8 text-lg font-medium">
+    <a
+      href="/"
+      class="sm:hidden absolute font-cursive text-2xl left-6 hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200 transition-all"
+      >lhz07's blog</a
+    >
+    <nav class="sm:flex hidden space-x-8 text-lg font-medium">
       <a
         href="/"
         class="transition-colors duration-200 {% if page == 'home' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
@@ -97,8 +153,46 @@
       >
     </nav>
     <button
+      id="hamburger-toggle"
+      class="sm:hidden absolute right-4 p-2 w-10 h-10 z-50 flex items-center justify-center group text-black dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-300"
+    >
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="menu-icon astro-ou4d3k2k"
+      >
+        <line
+          x1="3"
+          y1="18"
+          x2="21"
+          y2="18"
+          class="line top origin-[25%_50%] duration-300"
+        ></line>
+        <line
+          x1="3"
+          y1="12"
+          x2="21"
+          y2="12"
+          class="line mid origin-center duration-300"
+        ></line>
+        <line
+          x1="3"
+          y1="6"
+          x2="21"
+          y2="6"
+          class="line bot origin-[25%_50%] duration-300"
+        ></line>
+      </svg>
+    </button>
+    <button
       id="theme-toggle"
-      class="absolute right-4 p-2 w-10 h-10 flex items-center justify-center group text-black dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-300"
+      class="flex absolute right-14 sm:right-4 p-2 w-10 h-10 items-center justify-center group text-black dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-300"
     >
       <!-- Sun icon -->
       <svg
@@ -138,7 +232,43 @@
     </main>
     {% endblock main %} {% block footer %}
     <footer class="container mx-auto px-6 pb-2 pt-6 md:max-w-4xl">
-      <div class="px-6 py-4 text-center">
+      <div class="px-6 py-4 items-center flex flex-col">
+        <div class="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+          <svg
+            x="0px"
+            y="0px"
+            width="20px"
+            height="20px"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            class="h-4 w-4"
+          >
+            <path d="M11,6.5V2.2L15.8,7h-4.2C11.2,7,11,6.8,11,6.5z"></path>
+            <path
+              d="M3.5,12C3.2,12,3,12.2,3,12.5v4C3,16.8,2.8,17,2.5,17S2,16.8,2,16.5V16c0-0.3-0.2-0.5-0.5-0.5S1,15.7,1,16v0.5
+	C1,17.3,1.7,18,2.5,18S4,17.3,4,16.5v-4C4,12.2,3.8,12,3.5,12z"
+            ></path>
+            <path
+              d="M5,13.5C5,12.7,5.7,12,6.5,12S8,12.7,8,13.5C8,13.8,7.8,14,7.5,14S7,13.8,7,13.5S6.8,13,6.5,13S6,13.2,6,13.5v0.4
+	c0,0.2,0.1,0.4,0.3,0.4l0.9,0.4C7.7,15,8,15.5,8,16.1v0.4C8,17.3,7.3,18,6.5,18S5,17.3,5,16.5C5,16.2,5.2,16,5.5,16S6,16.2,6,16.5
+	S6.2,17,6.5,17S7,16.8,7,16.5v-0.4c0-0.2-0.1-0.4-0.3-0.4l-0.9-0.4C5.3,15,5,14.5,5,13.9V13.5z"
+            ></path>
+            <path
+              d="M17,19c-0.2,0-0.4-0.1-0.6-0.2L1.5,3.6c-0.3-0.3-0.3-0.8,0-1.1c0.3-0.3,0.8-0.3,1.1,0l14.9,15.2c0.3,0.3,0.3,0.8,0,1.1
+	C17.4,19,17.2,19,17,19z"
+            ></path>
+            <g>
+              <path
+                d="M16,13.9V8h-4.5C10.7,8,10,7.3,10,6.5V2H5.5C5.2,2,4.9,2.1,4.6,2.3L16,13.9z"
+              ></path>
+              <path
+                d="M4,4v7.1c0.3,0.1,0.6,0.3,0.8,0.6c1-1,2.6-0.9,3.5,0.1C8.8,12.2,9,12.9,9,13.5c0,0.4-0.2,0.8-0.5,1.1C8.8,15,9,15.6,9,16.1
+		v0.4c0,0.6-0.2,1.1-0.5,1.5h6c0.8,0,1.5-0.7,1.5-1.5v-0.3L4,4z"
+              ></path>
+            </g>
+          </svg>
+          Works well with little JavaScript
+        </div>
         <p class="text-sm text-gray-600 dark:text-gray-400">
           &copy; 2025 by
           <a

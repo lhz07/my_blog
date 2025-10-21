@@ -16,5 +16,12 @@ avatar = "/static/img/friends/avatar_chen.webp"
 name = "A Moment's Rest"
 url = "https://a-moment096.github.io"
 # src="https://a-moment096.github.io/avatar.jpg"
-avatar = "/static/img/friends/avatar_a moment.webp"
+avatar = "/static/img/friends/avatar_a_moment.webp"
 description = "AMoment 的 Blog"
+
+[[friend]]
+name = "Ling 的小窝"
+url = "https://blog.llma.top"
+# src="https://blog.llma.top/assets/images/avatar.png"
+avatar = "static/img/friends/avatar_ling.webp"
+description = "一只Tac"

@@ -11,8 +11,13 @@
     font-size: 13px;
 }
 
+@font-face {
+    font-family: "GreatVibes-Regular";
+    src: url("/static/fonts/GreatVibes-Regular.ttf") format("truetype");
+}
+
 .active {
-    @apply bg-blue-500 text-white;
+    @apply bg-blue-500 text-white !important;
 }
 .active:hover {
     /* override */

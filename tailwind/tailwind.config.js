@@ -3,7 +3,11 @@ module.exports = {
   darkMode: "class",
   content: ["../templates/**/*.{html,js}"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        cursive: ["GreatVibes-Regular", "cursive"],
+      },
+    },
   },
   plugins: [],
 };

@@ -49,7 +49,7 @@ tag_result) %}
       <div class="flex flex-row">
         <button
           type="submit"
-          class="{% if show_result %} ml-2 {% endif %}py-2 px-2 text-base font-medium text-gray-600 bg-white dark:bg-slate-500 dark:text-slate-100 dark:border-0 border border-gray-200 rounded-xl hover:text-gray-800 hover:shadow-md dark:hover:text-slate-50 transition-all duration-200 shadow-sm whitespace-nowrap"
+          class="{% if show_result %} ml-2 {% endif %}py-2 px-2 text-base font-medium text-gray-600 bg-white dark:bg-slate-500 dark:text-slate-100 dark:border-0 border border-gray-200 rounded-xl hover:text-gray-800 hover:shadow-md dark:hover:text-white dark:hover:bg-slate-600 transition-all duration-200 shadow-sm whitespace-nowrap"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -66,7 +66,7 @@ tag_result) %}
         <button
           type="submit"
           formaction="/lucky"
-          class="{% if show_result %}hidden {% endif %}md:px-4 py-2 px-3 ml-2 text-base font-medium text-gray-600 bg-white dark:bg-slate-500 dark:text-slate-100 dark:border-0 border border-gray-200 rounded-xl hover:text-gray-800 hover:shadow-md dark:hover:text-slate-50 transition-all duration-200 shadow-sm whitespace-nowrap"
+          class="{% if show_result %}hidden {% endif %}md:px-4 py-2 px-3 ml-2 text-base font-medium text-gray-600 bg-white dark:bg-slate-500 dark:text-slate-100 dark:border-0 border border-gray-200 rounded-xl hover:text-gray-800 hover:shadow-md dark:hover:text-blue-400 dark:hover:bg-slate-600 transition-all duration-200 shadow-sm whitespace-nowrap"
         >
           I'm Feeling Lucky
         </button>
@@ -75,7 +75,7 @@ tag_result) %}
           <button
             type="button"
             id="toggleTagBtn"
-            class="py-2 px-2 ml-2 text-base font-medium text-gray-600 bg-white dark:bg-slate-500 dark:text-slate-100 dark:border-0 border border-gray-200 rounded-xl hover:text-gray-800 hover:shadow-md dark:hover:text-slate-50 transition-all duration-200 shadow-sm whitespace-nowrap"
+            class="py-2 px-2 ml-2 text-base font-medium text-gray-600 bg-white dark:bg-slate-500 dark:text-slate-100 dark:border-0 border border-gray-200 rounded-xl hover:text-gray-800 hover:shadow-md dark:hover:text-white dark:hover:bg-slate-600 transition-all duration-200 shadow-sm whitespace-nowrap"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -96,7 +96,7 @@ tag_result) %}
           >
             <!-- Arrow -->
             <div
-              class="absolute -top-[9px] right-5 w-4 h-4 rotate-45 bg-white dark:bg-slate-700 border-l border-t border-gray-200 dark:border-slate-600"
+              class="absolute -top-[9px] right-4 w-4 h-4 rotate-45 bg-white dark:bg-slate-700 border-l border-t border-gray-200 dark:border-slate-600"
             ></div>
 
             <!-- Tag Search -->
@@ -112,7 +112,7 @@ tag_result) %}
               <button
                 type="button"
                 id="clearBtn"
-                class="md:ml-3 md:px-2 py-2 px-3 ml-2 text-sm text-gray-600 bg-white dark:bg-slate-500 dark:text-slate-100 dark:border-0 border border-gray-200 rounded-xl hover:text-gray-800 hover:shadow-md dark:hover:text-slate-50 transition-all duration-200 shadow-sm whitespace-nowrap"
+                class="md:ml-3 md:px-2 py-2 px-3 ml-2 text-sm text-gray-600 bg-white dark:bg-slate-500 dark:text-slate-100 dark:border-0 border border-gray-200 rounded-xl hover:text-gray-800 hover:shadow-md dark:hover:text-white dark:hover:bg-slate-600 transition-all duration-200 shadow-sm whitespace-nowrap"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -137,7 +137,7 @@ tag_result) %}
               <button
                 type="button"
                 data-tag="{{tag}}"
-                class="text-sm px-3 py-1 rounded-full border bg-white hover:bg-gray-100{% if selected_tags and tag | lower in selected_tags %} active{% endif %}"
+                class="text-sm px-3 py-1 rounded-full border bg-white dark:bg-slate-600 dark:text-slate-100 dark:border-0 hover:bg-gray-100 dark:hover:bg-slate-500 dark:hover:text-white transition-all{% if selected_tags and tag | lower in selected_tags %} active{% endif %}"
               >
                 {{ tag }}
               </button>
