@@ -28,8 +28,8 @@ block header %}
     </a>
   </div>
 </div>
-{% endblock header %} {% block content %}
-<main class="container mx-auto px-1 py-8 md:max-w-4xl">
+{% endblock header %} {% block main %}
+<main class="container mx-auto px-1 py-8 md:max-w-3xl relative flex-col">
   <!-- Article Card -->
   <article
     class="bg-white dark:bg-slate-700 dark:border-0 rounded-2xl border border-gray-200 shadow-sm overflow-hidden"
@@ -124,5 +124,37 @@ block header %}
       </div>
     </div>
   </article>
+  <div
+    id="toc-container"
+    class="h-full xl:absolute xl:top-0 xl:left-full fixed top-3 right-3 py-8 ml-5 xl:pr-3 hidden xl:block w-52"
+  >
+    <div
+      id="toc"
+      class="toc sticky pr-3 max-h-[70vh] overflow-auto top-20 text-gray-800 dark:text-slate-100 bg-white dark:bg-slate-700 rounded-2xl border border-gray-200 dark:border-gray-600 shadow-md p-1"
+    ></div>
+  </div>
 </main>
-{% endblock content %}
+<button
+  id="toc-toggle-btn"
+  class="xl:hidden fixed top-5 right-3 inline-flex items-center p-2 text-sm font-medium dark:border-0 dark:text-slate-100 dark:bg-slate-600 text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-800 hover:shadow-md dark:hover:text-white dark:hover:bg-slate-500 transition duration-200 shadow-sm"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    height="24px"
+    viewBox="0 -960 960 960"
+    width="24px"
+    fill="currentColor"
+  >
+    <path
+      d="M320-600q-17 0-28.5-11.5T280-640q0-17 11.5-28.5T320-680h480q17 0 28.5 11.5T840-640q0 17-11.5 28.5T800-600H320Zm0 160q-17 0-28.5-11.5T280-480q0-17 11.5-28.5T320-520h480q17 0 28.5 11.5T840-480q0 17-11.5 28.5T800-440H320Zm0 160q-17 0-28.5-11.5T280-320q0-17 11.5-28.5T320-360h480q17 0 28.5 11.5T840-320q0 17-11.5 28.5T800-280H320ZM160-600q-17 0-28.5-11.5T120-640q0-17 11.5-28.5T160-680q17 0 28.5 11.5T200-640q0 17-11.5 28.5T160-600Zm0 160q-17 0-28.5-11.5T120-480q0-17 11.5-28.5T160-520q17 0 28.5 11.5T200-480q0 17-11.5 28.5T160-440Zm0 160q-17 0-28.5-11.5T120-320q0-17 11.5-28.5T160-360q17 0 28.5 11.5T200-320q0 17-11.5 28.5T160-280Z"
+    />
+  </svg>
+</button>
+<div class="flex flex-col items-center mt-28 mb-20">
+  <p class="text-xl dark:text-slate-100 text-center mb-8">已经到底啦！</p>
+  <img
+    src="/static/img/stickers/AgAD6AoAAspxuVY.webp"
+    class="w-[40vh] rounded-lg"
+  />
+</div>
+{% endblock main %}

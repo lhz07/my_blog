@@ -21,6 +21,7 @@
       document.documentElement.classList.add("dark");
     }
   </script>
+  {% block theme_button %}
   <script type="module">
     const hamburgerToggleBtn = document.getElementById("hamburger-toggle");
     const menuIconLines = hamburgerToggleBtn.querySelectorAll("svg > line");
@@ -43,7 +44,6 @@
       }
     });
   </script>
-  {% block theme_button %}
   <script type="module">
     const themeToggleBtn = document.getElementById("theme-toggle");
     const sun = document.getElementById("icon-sun");
@@ -95,7 +95,7 @@
   {% block header %}
   <div
     id="navOverlay"
-    class="fixed inset-0 bg-white dark:bg-slate-700 dark:bg-opacity-40 bg-opacity-40 backdrop-blur-md z-50 opacity-0 flex pointer-events-none items-center justify-center p-4 transition-all duration-500"
+    class="sm:hidden fixed inset-0 bg-white dark:bg-slate-700 dark:bg-opacity-40 bg-opacity-40 backdrop-blur-md z-50 opacity-0 flex pointer-events-none items-center justify-center p-4 transition-all duration-500"
   >
     <nav
       class="flex flex-col gap-8 text-lg font-medium -translate-y-40 opacity-0 transition-all duration-500"

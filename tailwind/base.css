@@ -11,6 +11,19 @@
     font-size: 13px;
 }
 
+.toc li {
+    @apply ml-2 my-1;
+}
+
+.toc li a {
+    @apply pl-2 py-1 rounded-lg transition-all w-full block hover:bg-gray-100 dark:hover:bg-slate-600;
+    font-size: 0.95rem;
+}
+
+.toc-active {
+    @apply bg-blue-100 dark:bg-blue-500 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-600 !important;
+}
+
 @font-face {
     font-family: "GreatVibes-Regular";
     src: url("/static/fonts/GreatVibes-Regular.ttf") format("truetype");
