@@ -101,7 +101,7 @@ function generateTOC(containerSelector = "#toc") {
         const target = document.getElementById(a.getAttribute("href").slice(1));
         if (target) {
           window.scrollTo({
-            top: target.offsetTop - 10,
+            top: target.offsetTop + 62 - 10,
             behavior: "smooth",
           });
         }
@@ -120,7 +120,7 @@ function generateTOC(containerSelector = "#toc") {
     const scrollY = window.scrollY;
     let currentId = headingOffsets[0].id;
     for (let i = 0; i < headingOffsets.length; i++) {
-      if (scrollY >= headingOffsets[i].offset - 40) {
+      if (scrollY >= headingOffsets[i].offset + 62 - 10) {
         currentId = headingOffsets[i].id;
       } else {
         break;
