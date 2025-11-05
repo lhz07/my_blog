@@ -7,29 +7,40 @@ use actix_web::{
 };
 use once_cell::sync::Lazy;
 use rand::seq::IndexedRandom;
-use std::{fs, io, net::TcpListener, path::PathBuf};
+use std::{
+    fs, io,
+    net::TcpListener,
+    path::PathBuf,
+    sync::{Arc, LazyLock},
+};
 use tera::Tera;
 
-use crate::errors::{CatError, RespError};
+use crate::{
+    errors::{CatError, RespError},
+    lock::Lock,
+};
 
 pub mod errors;
 pub mod handlers;
+pub mod lock;
 pub mod search_utils;
 pub mod timestamp;
 
-lazy_static::lazy_static! {
-    pub static ref TEMPLATES: Tera = {
-        let mut tera = match Tera::new("templates/**/*.html") {
-            Ok(t) => t,
-            Err(e) => {
-                println!("Parsing error(s): {}", e);
-                std::process::exit(1);
-            }
-        };
-        tera.autoescape_on(vec!["html", ".sql"]);
-        tera
+#[cfg(debug_assertions)]
+pub mod socket;
+
+static TEMPLATES: LazyLock<Arc<Lock<Tera>>> = LazyLock::new(|| {
+    let mut tera = match Tera::new("templates/**/*.html") {
+        Ok(t) => t,
+        Err(e) => {
+            println!("Parsing error(s): {}", e);
+            std::process::exit(1);
+        }
     };
-}
+    tera.autoescape_on(vec!["html", ".sql"]);
+    let lock = Lock::new(tera);
+    Arc::new(lock)
+});
 
 pub static CONTEXT: Lazy<tera::Context> = Lazy::new(|| {
     #[cfg(debug_assertions)]
@@ -57,7 +68,6 @@ pub static MD_OPTIONS: Lazy<comrak::Options> = Lazy::new(|| {
     options
 });
 
-#[inline(always)]
 async fn not_found_handler() -> Result<HttpResponse, RespError> {
     not_found_page()
 }
@@ -78,18 +88,20 @@ fn not_found_page() -> Result<HttpResponse, RespError> {
         .and_then(|p| p.file_name())
         .ok_or(RespError::InternalServerError)?;
     context.insert("sticker", sticker.to_string_lossy().as_ref());
-    let html = TEMPLATES.render("not_found.html", &context)?;
+    let html = TEMPLATES.get().render("not_found.html", &context)?;
     Ok(HttpResponse::NotFound()
         .content_type("text/html")
         .body(html))
 }
 
 pub fn start_blog(listener: TcpListener) -> Result<Server, io::Error> {
+    #[cfg(debug_assertions)]
+    actix_web::rt::spawn(socket::run());
     let server = HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(TEMPLATES.clone()))
             .default_service(web::route().to(not_found_handler))
-            .service(Files::new("/static", "static/").use_last_modified(true))
+            .service(Files::new("/static", "static/").use_last_modified(!cfg!(debug_assertions)))
             .wrap(middleware::Logger::default())
             .wrap(Compress::default())
             .service(handlers::index)

@@ -1,6 +1,6 @@
 #!/bin/bash
 cd tailwind && npm run build-css-prod && cd -
-cargo build --release --target x86_64-unknown-linux-musl
+cargo build --release --target x86_64-unknown-linux-musl --no-default-features
 cargo run --release --bin index
 if [ -d "build" ]; then
     rm -r build

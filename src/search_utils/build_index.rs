@@ -1,6 +1,6 @@
 use crate::{
     errors::CatError,
-    handlers::{home_handler::find_all_frontmatters, post_handler::extract_md},
+    handlers::{post_handler::extract_md, post_handler::find_all_frontmatters},
     search_utils::{
         INDEX_DIR,
         cleaner::{md_to_plain, preprocess_text},

@@ -5,10 +5,10 @@ meta_data.author }} {% endblock title %} {% block scripts %}
 <!--<link rel="stylesheet" href="/static/css/xcode-dark.css" />-->
 {% endblock scripts %} {% block theme_button %} {% endblock theme_button %} {%
 block header %}
-<div class="container mx-auto px-6 pt-6 md:max-w-4xl">
+<div id="article-header" class="container mx-auto px-6 pt-6 md:max-w-4xl">
   <div class="flex items-center justify-between">
     <a
-      href="{% if referer %}{{referer}}{% else %}/{% endif %}"
+      href="/"
       class="inline-flex items-center px-4 py-2 text-sm font-medium dark:border-0 dark:text-slate-100 dark:bg-slate-600 text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-800 hover:shadow-md dark:hover:text-white dark:hover:bg-slate-500 transition duration-200 shadow-sm"
     >
       <svg
@@ -30,113 +30,157 @@ block header %}
 </div>
 {% endblock header %} {% block main %}
 <main class="container mx-auto px-1 py-8 md:max-w-3xl relative flex-col">
-  <!-- Article Card -->
-  <article
-    class="bg-white dark:bg-slate-700 dark:border-0 rounded-2xl border border-gray-200 shadow-sm overflow-hidden"
+  <main
+    id="article-content"
+    class="container mx-auto md:max-w-3xl relative flex-col"
   >
-    <!-- Article Header -->
-    <div
-      class="px-8 py-6 border-b border-gray-100 dark:border-0 bg-gray-50/50 dark:bg-slate-600"
+    <!-- Article Card -->
+    <article
+      class="bg-white dark:bg-slate-700 dark:border-0 rounded-2xl border border-gray-200 shadow-sm overflow-hidden"
     >
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-4">
-        {{ meta_data.title }}
-      </h1>
+      <!-- Article Header -->
       <div
-        class="flex flex-wrap items-center text-sm text-gray-600 dark:text-slate-200 gap-4 mb-4"
+        class="px-8 py-6 border-b border-gray-100 dark:border-0 bg-gray-50/50 dark:bg-slate-600"
       >
-        <div class="flex items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            fill="currentColor"
-            class="w-4 h-4 mr-1"
-          >
-            <path
-              d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm246-164q-59 0-99.5-40.5T340-580q0-59 40.5-99.5T480-720q59 0 99.5 40.5T620-580q0 59-40.5 99.5T480-440Zm0 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q53 0 100-15.5t86-44.5q-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160Zm0-360q26 0 43-17t17-43q0-26-17-43t-43-17q-26 0-43 17t-17 43q0 26 17 43t43 17Zm0-60Zm0 360Z"
-            />
-          </svg>
-          {{ meta_data.author }}
-        </div>
-        <div class="flex items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            fill="currentColor"
-            class="w-4 h-4 mr-1"
-          >
-            <path
-              d="M200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-40q0-17 11.5-28.5T280-880q17 0 28.5 11.5T320-840v40h320v-40q0-17 11.5-28.5T680-880q17 0 28.5 11.5T720-840v40h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H200Zm0-80h560v-400H200v400Zm0-480h560v-80H200v80Zm0 0v-80 80Zm280 240q-17 0-28.5-11.5T440-440q0-17 11.5-28.5T480-480q17 0 28.5 11.5T520-440q0 17-11.5 28.5T480-400Zm-160 0q-17 0-28.5-11.5T280-440q0-17 11.5-28.5T320-480q17 0 28.5 11.5T360-440q0 17-11.5 28.5T320-400Zm320 0q-17 0-28.5-11.5T600-440q0-17 11.5-28.5T640-480q17 0 28.5 11.5T680-440q0 17-11.5 28.5T640-400ZM480-240q-17 0-28.5-11.5T440-280q0-17 11.5-28.5T480-320q17 0 28.5 11.5T520-280q0 17-11.5 28.5T480-240Zm-160 0q-17 0-28.5-11.5T280-280q0-17 11.5-28.5T320-320q17 0 28.5 11.5T360-280q0 17-11.5 28.5T320-240Zm320 0q-17 0-28.5-11.5T600-280q0-17 11.5-28.5T640-320q17 0 28.5 11.5T680-280q0 17-11.5 28.5T640-240Z"
-            />
-          </svg>
-          {{ meta_data.posted }}
-        </div>
-        <div class="flex items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            fill="currentColor"
-            class="w-4 h-4 mr-1"
-          >
-            <path
-              d="M520-496v-144q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640v159q0 8 3 15.5t9 13.5l132 132q11 11 28 11t28-11q11-11 11-28t-11-28L520-496ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-400Zm0 320q133 0 226.5-93.5T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 133 93.5 226.5T480-160Z"
-            />
-          </svg>
-          {{ meta_data.estimated_reading_time }} min read
-        </div>
-      </div>
-      <!-- Tags -->
-      {% if meta_data.tags|length > 0 %}
-      <div class="flex flex-wrap gap-2">
-        {% for tag in meta_data.tags %}
-        <a
-          class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-500 text-blue-800 dark:text-blue-100 hover:-translate-y-[1px] shadow-sm hover:shadow-md transition duration-200"
-          href="/search?tag={{tag}}"
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-4">
+          {{ meta_data.title }}
+        </h1>
+        <div
+          class="flex flex-wrap items-center text-sm text-gray-600 dark:text-slate-200 gap-4 mb-4"
         >
-          {{tag}}
-        </a>
-        {% endfor %}
-      </div>
-      {% endif %}
+          <div class="flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="currentColor"
+              class="w-4 h-4 mr-1"
+            >
+              <path
+                d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm246-164q-59 0-99.5-40.5T340-580q0-59 40.5-99.5T480-720q59 0 99.5 40.5T620-580q0 59-40.5 99.5T480-440Zm0 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q53 0 100-15.5t86-44.5q-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160Zm0-360q26 0 43-17t17-43q0-26-17-43t-43-17q-26 0-43 17t-17 43q0 26 17 43t43 17Zm0-60Zm0 360Z"
+              />
+            </svg>
+            {{ meta_data.author }}
+          </div>
+          <div class="flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="currentColor"
+              class="w-4 h-4 mr-1"
+            >
+              <path
+                d="M200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-40q0-17 11.5-28.5T280-880q17 0 28.5 11.5T320-840v40h320v-40q0-17 11.5-28.5T680-880q17 0 28.5 11.5T720-840v40h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H200Zm0-80h560v-400H200v400Zm0-480h560v-80H200v80Zm0 0v-80 80Zm280 240q-17 0-28.5-11.5T440-440q0-17 11.5-28.5T480-480q17 0 28.5 11.5T520-440q0 17-11.5 28.5T480-400Zm-160 0q-17 0-28.5-11.5T280-440q0-17 11.5-28.5T320-480q17 0 28.5 11.5T360-440q0 17-11.5 28.5T320-400Zm320 0q-17 0-28.5-11.5T600-440q0-17 11.5-28.5T640-480q17 0 28.5 11.5T680-440q0 17-11.5 28.5T640-400ZM480-240q-17 0-28.5-11.5T440-280q0-17 11.5-28.5T480-320q17 0 28.5 11.5T520-280q0 17-11.5 28.5T480-240Zm-160 0q-17 0-28.5-11.5T280-280q0-17 11.5-28.5T320-320q17 0 28.5 11.5T360-280q0 17-11.5 28.5T320-240Zm320 0q-17 0-28.5-11.5T600-280q0-17 11.5-28.5T640-320q17 0 28.5 11.5T680-280q0 17-11.5 28.5T640-240Z"
+              />
+            </svg>
+            {{ meta_data.posted }}
+          </div>
+          <div class="flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 -960 960 960"
+              width="24px"
+              fill="currentColor"
+              class="w-4 h-4 mr-1"
+            >
+              <path
+                d="M520-496v-144q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640v159q0 8 3 15.5t9 13.5l132 132q11 11 28 11t28-11q11-11 11-28t-11-28L520-496ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-400Zm0 320q133 0 226.5-93.5T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 133 93.5 226.5T480-160Z"
+              />
+            </svg>
+            {{ meta_data.estimated_reading_time }} min read
+          </div>
+        </div>
+        <!-- Tags -->
+        {% if meta_data.tags|length > 0 %}
+        <div class="flex flex-wrap gap-2">
+          {% for tag in meta_data.tags %}
+          <a
+            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-500 text-blue-800 dark:text-blue-100 hover:-translate-y-px shadow-sm hover:shadow-md transition duration-200"
+            href="/search?tag={{tag}}"
+          >
+            {{tag}}
+          </a>
+          {% endfor %}
+        </div>
+        {% endif %}
 
-      <!-- Summary -->
-      <div
-        class="mt-6 p-4 bg-gray-100 dark:bg-inherit dark:border-slate-500 dark:border rounded-lg"
-      >
-        <p class="text-gray-700 dark:text-slate-200 italic">
-          {{ meta_data.description }}
-        </p>
+        <!-- Summary -->
+        <div
+          class="mt-6 p-4 bg-gray-100 dark:bg-inherit dark:border-slate-500 dark:border rounded-lg"
+        >
+          <p class="text-gray-700 dark:text-slate-200 italic">
+            {{ meta_data.description }}
+          </p>
+        </div>
       </div>
-    </div>
 
-    <!-- Article Content -->
-    <div class="markdown-body px-6 py-8">
-      <div
-        id="article-content"
-        class="prose prose-lg max-w-none text-gray-800 dark:text-slate-100 leading-relaxed"
-      >
-        {{ post | safe }}
+      <!-- Article Content -->
+      <div class="markdown-body px-6 py-8">
+        <div
+          id="article-content"
+          class="prose prose-lg max-w-none text-gray-800 dark:text-slate-100 leading-relaxed"
+        >
+          {{ post | safe }}
+        </div>
       </div>
-    </div>
-  </article>
-  <div
-    id="toc-container"
-    class="h-full xl:absolute xl:top-0 xl:left-full fixed top-3 right-3 py-8 ml-5 xl:pr-3 hidden xl:block w-52"
-  >
+    </article>
     <div
-      id="toc"
-      class="toc sticky pr-3 max-h-[70vh] overflow-auto top-20 text-gray-800 dark:text-slate-100 bg-white dark:bg-slate-700 rounded-2xl border border-gray-200 dark:border-gray-600 shadow-md p-1"
-    ></div>
+      id="toc-container"
+      class="xl:h-full xl:absolute xl:top-0 xl:left-full fixed top-17 right-3 ml-5 xl:pr-3 xl:scale-100 xl:translate-0 xl:opacity-100 xl:block xl:pointer-events-auto w-52 scale-50 -translate-y-32 translate-x-12 opacity-0 pointer-events-none transition-all duration-300 xl:transition-none"
+    >
+      <div
+        id="toc"
+        class="toc sticky pr-3 max-h-[70vh] overflow-auto top-20 text-gray-800 dark:text-slate-100 bg-white dark:bg-slate-700 rounded-2xl border border-gray-200 dark:border-gray-600 shadow-md p-1"
+      ></div>
+    </div>
+  </main>
+  <div class="flex justify-between mt-8">
+    <a
+      class="{% if not prev %}opacity-0 pointer-events-none {% endif %}inline-flex items-center justify-center max-w-52 px-4 py-2 text-sm font-medium dark:border-0 dark:text-slate-100 dark:bg-slate-600 text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-800 hover:shadow-md dark:hover:text-white dark:hover:bg-slate-500 transition duration-200 shadow-sm"
+      href="/posts/{% if prev %}{{prev.file_name}}{% endif %}"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24px"
+        viewBox="0 -960 960 960"
+        width="24px"
+        class="w-4 h-4 mr-1"
+        fill="currentColor"
+      >
+        <path
+          d="m382-480 294 294q15 15 14.5 35T675-116q-15 15-35 15t-35-15L297-423q-12-12-18-27t-6-30q0-15 6-30t18-27l308-308q15-15 35.5-14.5T676-844q15 15 15 35t-15 35L382-480Z"
+        />
+      </svg>
+      <span class="flex-1">{% if prev %}{{prev.title}}{% endif %}</span>
+    </a>
+    <a
+      class="{% if next %}flex{% else %}hidden{% endif %} items-center justify-center max-w-52 px-4 py-2 text-sm font-medium dark:border-0 dark:text-slate-100 dark:bg-slate-600 text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-800 hover:shadow-md dark:hover:text-white dark:hover:bg-slate-500 transition duration-200 shadow-sm"
+      href="/posts/{% if next %}{{next.file_name}}{% endif %}"
+    >
+      <span class="flex-1">{% if next %}{{next.title}}{% endif %}</span>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24px"
+        viewBox="0 -960 960 960"
+        width="24px"
+        class="w-4 h-4 ml-1"
+        fill="currentColor"
+      >
+        <path
+          d="M579-480 285-774q-15-15-14.5-35.5T286-845q15-15 35.5-15t35.5 15l307 308q12 12 18 27t6 30q0 15-6 30t-18 27L356-115q-15 15-35 14.5T286-116q-15-15-15-35.5t15-35.5l293-293Z"
+        />
+      </svg>
+    </a>
   </div>
 </main>
+
 <button
   id="toc-toggle-btn"
-  class="xl:hidden fixed top-5 right-3 inline-flex items-center p-2 text-sm font-medium dark:border-0 dark:text-slate-100 dark:bg-slate-600 text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-800 hover:shadow-md dark:hover:text-white dark:hover:bg-slate-500 transition duration-200 shadow-sm"
+  class="xl:hidden fixed top-5 right-3 inline-flex items-center p-2 text-sm font-medium dark:border-0 dark:text-slate-100 dark:bg-slate-600 text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-800 hover:shadow-md dark:hover:text-white dark:hover:bg-slate-500 transition duration-300 shadow-sm"
 >
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -150,11 +194,11 @@ block header %}
     />
   </svg>
 </button>
-<div class="flex flex-col items-center mt-28 mb-20">
+<div class="flex flex-col items-center mt-24 mb-24">
   <p class="text-xl dark:text-slate-100 text-center mb-8">已经到底啦！</p>
   <img
     src="/static/img/stickers/AgAD6AoAAspxuVY.webp"
-    class="w-[40vh] rounded-lg"
+    class="md:w-[40vh] w-[50vw] max-w-72 rounded-lg"
   />
 </div>
 {% endblock main %}

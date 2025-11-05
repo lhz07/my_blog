@@ -20,6 +20,7 @@ document.querySelectorAll("pre").forEach((pre) => {
   });
   pre.appendChild(button);
 });
+
 document.querySelectorAll(".markdown-body a[href]").forEach((a) => {
   const url = a.getAttribute("href");
   if (url.startsWith("http://") || url.startsWith("https://")) {
@@ -31,8 +32,13 @@ document.querySelectorAll("pre code").forEach((block) => {
   const lines = html.split(/\r?\n/);
   block.innerHTML = lines.map((line) => `<div>${line || " "}</div>`).join("");
 });
+const tocToggleButton = document.getElementById("toc-toggle-btn");
 // Generate TOC starting from <h2>, with smooth scrolling and active highlighting
 function generateTOC(containerSelector = "#toc") {
+  const article_header = document.getElementById("article-header");
+  const article = document.getElementById("article-content");
+  const main_offset =
+    article_header.offsetHeight + article.offsetTop + article.offsetHeight - 65;
   // Collect all headings
   const allHeadings = Array.from(
     document.querySelectorAll("h2, h3, h4, h5, h6"),
@@ -52,7 +58,6 @@ function generateTOC(containerSelector = "#toc") {
   const counters = [0, 0, 0, 0, 0];
   let currentListStack = [tocRoot];
   let lastLevel = 1;
-
   for (const heading of headings) {
     // Normalize heading level relative to the top-level heading
     const level = parseInt(heading.tagName[1]) - minLevel + 1;
@@ -101,7 +106,7 @@ function generateTOC(containerSelector = "#toc") {
         const target = document.getElementById(a.getAttribute("href").slice(1));
         if (target) {
           window.scrollTo({
-            top: target.offsetTop + 62 - 10,
+            top: target.offsetTop + article_header.offsetHeight + 20,
             behavior: "smooth",
           });
         }
@@ -116,11 +121,24 @@ function generateTOC(containerSelector = "#toc") {
     id: h.id,
     offset: h.offsetTop,
   }));
+  const container = document.getElementById("toc-container");
+
   function updateActiveLink() {
     const scrollY = window.scrollY;
-    let currentId = headingOffsets[0].id;
+    if (scrollY > main_offset) {
+      tocToggleButton.classList.add("opacity-0");
+      if (!container.classList.contains("opacity-0")) {
+        tocToggleButton.click();
+      }
+    } else {
+      tocToggleButton.classList.remove("opacity-0");
+    }
+    let currentId = null;
     for (let i = 0; i < headingOffsets.length; i++) {
-      if (scrollY >= headingOffsets[i].offset + 62 - 10) {
+      if (
+        scrollY >=
+        headingOffsets[i].offset + article_header.offsetHeight + 20
+      ) {
         currentId = headingOffsets[i].id;
       } else {
         break;
@@ -138,10 +156,14 @@ function generateTOC(containerSelector = "#toc") {
   window.addEventListener("scroll", updateActiveLink);
   updateActiveLink();
 
+  tocToggleButton.addEventListener("click", () => {
+    container.classList.toggle("scale-50");
+    container.classList.toggle("opacity-0");
+    container.classList.toggle("-translate-y-32");
+    container.classList.toggle("translate-x-12");
+    container.classList.toggle("pointer-events-none");
+  });
+
   // end
 }
 generateTOC();
-const tocToggleButton = document.getElementById("toc-toggle-btn");
-tocToggleButton.addEventListener("click", () => {
-  document.getElementById("toc-container").classList.toggle("hidden");
-});

@@ -2,25 +2,90 @@ use crate::{
     CONTEXT, MD_OPTIONS,
     errors::{CatError, RespError},
     handlers::home_handler::FrontMatter,
+    lock::Lock,
 };
 use actix_web::{HttpRequest, HttpResponse, get, web};
-use std::fs;
+use ignore::{WalkBuilder, types::TypesBuilder};
+use std::{
+    collections::HashMap,
+    fs,
+    sync::{Arc, LazyLock},
+};
 use tera::Tera;
+
+pub fn find_all_frontmatters() -> Result<Vec<FrontMatter>, CatError> {
+    let mut t = TypesBuilder::new();
+    t.add_defaults();
+    let toml = t.select("toml").build().unwrap();
+    let file_walker = WalkBuilder::new("./posts").types(toml).build();
+    let mut frontmatters = Vec::new();
+    for entry in file_walker {
+        let entry = entry?;
+        let path = entry.path();
+        if path.is_file() {
+            let content = fs::read_to_string(path)?;
+            let fm: FrontMatter = toml::from_str(&content)?;
+            frontmatters.push(fm);
+        }
+    }
+    Ok(frontmatters)
+}
+
+pub static FRONTMATTER: LazyLock<Lock<HashMap<String, Arc<FrontMatter>>>> = LazyLock::new(|| {
+    let map = match initial_fm() {
+        Ok(f) => f,
+        Err(e) => {
+            eprintln!("Can not find frontmatters!, error: {e}");
+            std::process::exit(1);
+        }
+    };
+    Lock::new(map)
+});
+
+pub fn initial_fm() -> Result<HashMap<String, Arc<FrontMatter>>, CatError> {
+    let fm = find_all_frontmatters()?;
+    let map = fm
+        .into_iter()
+        .map(|f| (f.file_name.clone(), Arc::new(f)))
+        .collect::<HashMap<_, _>>();
+    Ok(map)
+}
+
+pub fn initial_sorted_fm() -> Vec<Arc<FrontMatter>> {
+    let mut fms = FRONTMATTER
+        .get()
+        .values()
+        .cloned()
+        .collect::<Vec<Arc<FrontMatter>>>();
+    fms.sort_by(|a, b| b.posted.cmp(&a.posted));
+    fms
+}
+
+pub static SORTED_FRONTMATTERS: LazyLock<Lock<Vec<Arc<FrontMatter>>>> =
+    LazyLock::new(|| Lock::new(initial_sorted_fm()));
 
 pub fn extract_md(post_name: &str) -> Result<String, CatError> {
     let s = fs::read_to_string(format!("./posts/{}/post.md", post_name))?;
     Ok(s)
 }
 
-pub fn extract_frontmatter(post_name: &str) -> Result<FrontMatter, CatError> {
-    let content = fs::read_to_string(format!("./posts/{}/post_frontmatter.toml", post_name))?;
-    let fm = toml::from_str(&content)?;
+pub fn extract_frontmatter(post_name: &str) -> Result<Arc<FrontMatter>, CatError> {
+    let fm = FRONTMATTER
+        .get()
+        .get(post_name)
+        .ok_or_else(|| {
+            CatError::IO(std::io::Error::other(format!(
+                "Frontmatter for post '{}' not found",
+                post_name
+            )))
+        })?
+        .clone();
     Ok(fm)
 }
 
 #[get("/posts/{post_name}")]
 pub async fn post(
-    templates: web::Data<Tera>,
+    templates: web::Data<Arc<Lock<Tera>>>,
     post_name: web::Path<String>,
     request: HttpRequest,
 ) -> Result<HttpResponse, RespError> {
@@ -41,7 +106,20 @@ pub async fn post(
         context.insert("referer", header);
     }
     context.insert("post", &md_html);
-    context.insert("meta_data", &frontmatter);
-    let html = templates.render("post.html", &context)?;
+    context.insert("meta_data", frontmatter.as_ref());
+    let index = SORTED_FRONTMATTERS
+        .get()
+        .iter()
+        .position(|f| f.file_name == frontmatter.file_name);
+    if let Some(index) = index {
+        if let Some(next) = SORTED_FRONTMATTERS.get().get(index + 1) {
+            context.insert("next", next);
+        }
+        if index > 0 {
+            let prev = &SORTED_FRONTMATTERS.get()[index - 1];
+            context.insert("prev", prev);
+        }
+    }
+    let html = templates.get().render("post.html", &context)?;
     Ok(HttpResponse::Ok().content_type("text/html").body(html))
 }

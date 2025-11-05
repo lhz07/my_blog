@@ -22,6 +22,12 @@ url = "mailto:a2722764368@gmail.com"
 icon = "/static/img/mail.svg"
 icon_dark = "/static/img/mail_dark.svg"
 
+[[contact]]
+name = "Matrix"
+url = "https://matrix.to/#/@lhz:chat.lhz07.com"
+icon = "/static/img/matrix.svg"
+icon_dark = "/static/img/matrix_dark.svg"
+
 [profile]
 subtitle = "A student who loves programming"
 description = "Explicit is better than implicit, but readability also counts."

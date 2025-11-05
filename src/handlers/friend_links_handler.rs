@@ -2,12 +2,13 @@ use actix_web::{HttpResponse, get, post, web};
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
 use serde::{Deserialize, Serialize};
 use sha1::Digest;
-use std::fs;
+use std::{fs, sync::Arc};
 use tera::Tera;
 
 use crate::{
     CONTEXT,
     errors::{CatError, RespError},
+    lock::Lock,
 };
 
 #[derive(Deserialize, Serialize)]
@@ -39,12 +40,14 @@ fn extract_friend_links() -> Result<Vec<Friend>, CatError> {
 }
 
 #[get("/friend_links")]
-pub async fn friend_links(templates: web::Data<Tera>) -> Result<HttpResponse, RespError> {
+pub async fn friend_links(
+    templates: web::Data<Arc<Lock<Tera>>>,
+) -> Result<HttpResponse, RespError> {
     let mut context = CONTEXT.clone();
     let friends = extract_friend_links().inspect_err(|e| eprintln!("{e}"))?;
     context.insert("page", "friend_links");
     context.insert("friends", &friends);
-    let html = templates.render("friend_links.html", &context)?;
+    let html = templates.get().render("friend_links.html", &context)?;
     Ok(HttpResponse::Ok().content_type("text/html").body(html))
 }
 fn count_files<P>(dir: P) -> std::io::Result<usize>

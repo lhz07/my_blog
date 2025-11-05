@@ -1,12 +1,13 @@
 use crate::{
     CONTEXT,
-    errors::{CatError, RespError},
+    errors::RespError,
+    handlers::post_handler::SORTED_FRONTMATTERS,
+    lock::Lock,
     timestamp::TimeStamp,
 };
 use actix_web::{HttpResponse, get, web};
-use ignore::{WalkBuilder, types::TypesBuilder};
 use serde::{Deserialize, Serialize};
-use std::fs;
+use std::sync::Arc;
 use tera::Tera;
 
 const POSTS_PER_PAGE: usize = 5;
@@ -24,39 +25,34 @@ pub struct FrontMatter {
 }
 
 #[get("/")]
-pub async fn index(templates: web::Data<Tera>) -> Result<HttpResponse, RespError> {
+pub async fn index(templates: web::Data<Arc<Lock<Tera>>>) -> Result<HttpResponse, RespError> {
     let mut context = CONTEXT.clone();
 
-    let mut frontmatters = find_all_frontmatters().inspect_err(|e| eprintln!("{e}"))?;
+    let frontmatters = SORTED_FRONTMATTERS.get();
     let page_count = frontmatters.len().div_ceil(POSTS_PER_PAGE);
-    frontmatters.sort_by(|a, b| b.posted.cmp(&a.posted));
-    let frontmatters = frontmatters
-        .into_iter()
-        .take(POSTS_PER_PAGE)
-        .collect::<Vec<_>>();
+    let frontmatters = frontmatters.iter().take(POSTS_PER_PAGE).collect::<Vec<_>>();
     context.insert("posts", &frontmatters);
     context.insert("page", "home");
     context.insert("current_page", &1);
     context.insert("page_count", &page_count);
-    let html = templates.render("home.html", &context)?;
+    let html = templates.get().render("home.html", &context)?;
     Ok(HttpResponse::Ok().content_type("text/html").body(html))
 }
 
 #[get("/pages/{page_num}")]
 pub async fn page(
-    templates: web::Data<Tera>,
+    templates: web::Data<Arc<Lock<Tera>>>,
     page_num: web::Path<usize>,
 ) -> Result<HttpResponse, RespError> {
-    let mut frontmatters = find_all_frontmatters().inspect_err(|e| eprintln!("{e}"))?;
+    let frontmatters = SORTED_FRONTMATTERS.get();
     let page_count = frontmatters.len().div_ceil(POSTS_PER_PAGE);
     let page_num = page_num.into_inner();
     if page_num > page_count || page_num < 1 {
         return Err(RespError::NotFound);
     }
     let mut context = CONTEXT.clone();
-    frontmatters.sort_by(|a, b| b.posted.cmp(&a.posted));
     let frontmatters = frontmatters
-        .into_iter()
+        .iter()
         .skip((page_num - 1) * POSTS_PER_PAGE)
         .take(POSTS_PER_PAGE)
         .collect::<Vec<_>>();
@@ -64,24 +60,6 @@ pub async fn page(
     context.insert("page", "home");
     context.insert("current_page", &page_num);
     context.insert("page_count", &page_count);
-    let html = templates.render("home.html", &context)?;
+    let html = templates.get().render("home.html", &context)?;
     Ok(HttpResponse::Ok().content_type("text/html").body(html))
-}
-
-pub fn find_all_frontmatters() -> Result<Vec<FrontMatter>, CatError> {
-    let mut t = TypesBuilder::new();
-    t.add_defaults();
-    let toml = t.select("toml").build().unwrap();
-    let file_walker = WalkBuilder::new("./posts").types(toml).build();
-    let mut frontmatters = Vec::new();
-    for entry in file_walker {
-        let entry = entry?;
-        let path = entry.path();
-        if path.is_file() {
-            let content = fs::read_to_string(path)?;
-            let fm: FrontMatter = toml::from_str(&content)?;
-            frontmatters.push(fm);
-        }
-    }
-    Ok(frontmatters)
 }

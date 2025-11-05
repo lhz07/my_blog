@@ -27,7 +27,7 @@ use tantivy::{
 #[derive(Debug, Serialize)]
 pub struct SearchTerm {
     pub score: f32,
-    pub fm: FrontMatter,
+    pub fm: Arc<FrontMatter>,
     pub snippet: String,
 }
 
@@ -258,7 +258,7 @@ pub fn search_tags(
     tags: HashSet<String>,
     limit: usize,
     offset: usize,
-) -> Result<SearchResult<FrontMatter>, CatError> {
+) -> Result<SearchResult<Arc<FrontMatter>>, CatError> {
     let instant_sum = Instant::now();
 
     let schema = INDEX.schema();

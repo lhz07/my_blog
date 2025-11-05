@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="zh-CN" class="">
+  <meta id="color-scheme" name="color-scheme" content="" />
   {% if debug_mode %}
+  <!--debug mode-->
   <script>
     const ws = new WebSocket("ws://localhost:9001");
     ws.onmessage = (event) => {
@@ -8,9 +10,17 @@
       window.location.reload(true);
     };
   </script>
+  <meta
+    http-equiv="Cache-Control"
+    content="no-cache, no-store, must-revalidate"
+  />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <!--debug mode-->
   {% endif %}
   <script>
     let isDark = sessionStorage.getItem("is_dark_theme");
+    const colorSchemeMeta = document.getElementById("color-scheme");
     if (isDark === null) {
       isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       sessionStorage.setItem("is_dark_theme", isDark);
@@ -19,6 +29,9 @@
     }
     if (isDark) {
       document.documentElement.classList.add("dark");
+      colorSchemeMeta.setAttribute("content", "dark");
+    } else {
+      colorSchemeMeta.setAttribute("content", "light");
     }
   </script>
   {% block theme_button %}
@@ -60,6 +73,9 @@
       const isDark = document.documentElement.classList.contains("dark");
       sessionStorage.setItem("is_dark_theme", isDark);
       if (isDark) {
+        // set dark scheme meta
+        colorSchemeMeta.setAttribute("content", "dark");
+
         // 切到 Moon
         sun.classList.remove("opacity-100", "scale-100", "rotate-0", "ease-in");
         sun.classList.add("opacity-0", "scale-75", "-rotate-90", "ease-out");
@@ -67,6 +83,9 @@
         moon.classList.remove("opacity-0", "scale-75", "rotate-90", "ease-out");
         moon.classList.add("opacity-100", "scale-100", "rotate-0", "ease-in");
       } else {
+        // set light scheme meta
+        colorSchemeMeta.setAttribute("content", "light");
+
         // 切回 Sun
         moon.classList.remove(
           "opacity-100",
@@ -90,12 +109,18 @@
     <title>{% block title %}{% endblock title %}</title>
     {% endblock head %}
     <link rel="stylesheet" type="text/css" href="/static/css/index.css" />
+    <style>
+      button,
+      [role="button"] {
+        cursor: pointer;
+      }
+    </style>
     <link rel="icon" type="image/png" href="/static/img/avatar.png" />
   </head>
   {% block header %}
   <div
     id="navOverlay"
-    class="sm:hidden fixed inset-0 bg-white dark:bg-slate-700 dark:bg-opacity-40 bg-opacity-40 backdrop-blur-md z-50 opacity-0 flex pointer-events-none items-center justify-center p-4 transition-all duration-500"
+    class="sm:hidden fixed inset-0 bg-white/40 dark:bg-slate-700/40 backdrop-blur-md z-50 opacity-0 flex pointer-events-none items-center justify-center p-4 transition-all duration-500"
   >
     <nav
       class="flex flex-col gap-8 text-lg font-medium -translate-y-40 opacity-0 transition-all duration-500"

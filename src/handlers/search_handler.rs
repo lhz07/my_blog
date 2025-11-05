@@ -1,7 +1,8 @@
 use crate::{
     CONTEXT,
     errors::RespError,
-    handlers::home_handler::find_all_frontmatters,
+    handlers::post_handler::SORTED_FRONTMATTERS,
+    lock::Lock,
     search_utils::search::{search_index, search_tags},
 };
 use actix_web::{HttpResponse, get, web};
@@ -11,7 +12,7 @@ use serde::{
     Deserialize,
     de::{self},
 };
-use std::collections::HashSet;
+use std::{collections::HashSet, sync::Arc};
 use tera::Tera;
 
 #[derive(Debug, Deserialize)]
@@ -54,10 +55,10 @@ where
 }
 
 static ALL_TAGS: Lazy<Vec<String>> = Lazy::new(|| {
-    let frontmatters = find_all_frontmatters().unwrap();
+    let frontmatters = SORTED_FRONTMATTERS.get();
     let mut tags = HashSet::new();
-    for fm in frontmatters {
-        tags.extend(fm.tags);
+    for fm in frontmatters.iter() {
+        tags.extend(fm.tags.clone());
     }
     let mut tags = tags.into_iter().collect::<Vec<_>>();
     tags.sort_by_key(|t| t.to_lowercase());
@@ -65,7 +66,7 @@ static ALL_TAGS: Lazy<Vec<String>> = Lazy::new(|| {
 });
 
 fn handle_tag(
-    templates: web::Data<Tera>,
+    templates: web::Data<Arc<Lock<Tera>>>,
     tags: HashSet<String>,
 ) -> Result<HttpResponse, RespError> {
     let mut context = CONTEXT.clone();
@@ -87,12 +88,12 @@ fn handle_tag(
     context.insert("current_page", &1);
     context.insert("page_count", &1);
     // context.insert("search_tags", );
-    let html = templates.render("search_text.html", &context)?;
+    let html = templates.get().render("search_text.html", &context)?;
     Ok(HttpResponse::Ok().content_type("text/html").body(html))
 }
 
 async fn handle_query_text(
-    templates: web::Data<Tera>,
+    templates: web::Data<Arc<Lock<Tera>>>,
     query_text: String,
     tags: Option<HashSet<String>>,
 ) -> Result<HttpResponse, RespError> {
@@ -115,13 +116,13 @@ async fn handle_query_text(
     context.insert("all_tags", &*ALL_TAGS);
     context.insert("current_page", &1);
     context.insert("page_count", &1);
-    let html = templates.render("search_text.html", &context)?;
+    let html = templates.get().render("search_text.html", &context)?;
     Ok(HttpResponse::Ok().content_type("text/html").body(html))
 }
 
 #[get("/search")]
 pub async fn search(
-    templates: web::Data<Tera>,
+    templates: web::Data<Arc<Lock<Tera>>>,
     query: web::Query<QueryParam>,
 ) -> Result<HttpResponse, RespError> {
     println!("query: {:?}", query);
@@ -132,7 +133,7 @@ pub async fn search(
             let mut context = CONTEXT.clone();
             context.insert("page", "search");
             context.insert("all_tags", &*ALL_TAGS);
-            let html = templates.render("search_text.html", &context)?;
+            let html = templates.get().render("search_text.html", &context)?;
             Ok(HttpResponse::Ok().content_type("text/html").body(html))
         }
     }
