@@ -1,10 +1,12 @@
 mod about_handler;
+pub mod archive_handler;
 mod friend_links_handler;
 pub mod home_handler;
 pub mod post_handler;
 mod search_handler;
 
 pub use about_handler::about;
+pub use archive_handler::archive;
 pub use friend_links_handler::{FriendRequest, friend_links, post_link};
 pub use home_handler::index;
 pub use home_handler::page;

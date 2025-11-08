@@ -1,9 +1,17 @@
 use chrono::{DateTime, FixedOffset};
 use serde::{Deserialize, Serialize};
-use std::fmt;
+use std::{fmt, ops::Deref};
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize, Default, Debug)]
 pub struct TimeStamp(DateTime<FixedOffset>);
+
+impl Deref for TimeStamp {
+    type Target = DateTime<FixedOffset>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 impl fmt::Display for TimeStamp {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

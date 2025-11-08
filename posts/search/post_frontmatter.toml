@@ -3,6 +3,7 @@ file_name = 'search'
 description = 'Search in artificial intelligence'
 tags = ['AI', 'Search']
 posted = '2025-09-24T15:07:03+08:00'
+updated = '2025-11-08T22:55:46+08:00'
 estimated_reading_time = 10
 author = 'lhz07'
 cover_image = "/static/img/posts/search/Pasted%20image%2020250414170213.webp"

@@ -34,10 +34,10 @@ Consider how far we've gone so far
 
 
 ![Image](/static/img/posts/search/Pasted%20image%2020250414182611.webp)
-####  Admissible Heuristic
+###  Admissible Heuristic
 The heuristic estimate is guaranteed to be less than the actual distance
 
 It is a perfectly sound way of doing an optimal search when about a map, but it may not work when it's not about a map.
 So we need **Consistency**.
 
-#### Consistent Heuristic
+### Consistent Heuristic

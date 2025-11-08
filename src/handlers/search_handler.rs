@@ -1,7 +1,7 @@
 use crate::{
     CONTEXT,
     errors::RespError,
-    handlers::post_handler::SORTED_FRONTMATTERS,
+    handlers::post_handler::SORT_BY_POSTED_FRONTMATTERS,
     lock::Lock,
     search_utils::search::{search_index, search_tags},
 };
@@ -55,7 +55,7 @@ where
 }
 
 static ALL_TAGS: Lazy<Vec<String>> = Lazy::new(|| {
-    let frontmatters = SORTED_FRONTMATTERS.get();
+    let frontmatters = SORT_BY_POSTED_FRONTMATTERS.get();
     let mut tags = HashSet::new();
     for fm in frontmatters.iter() {
         tags.extend(fm.tags.clone());

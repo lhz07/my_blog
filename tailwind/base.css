@@ -27,8 +27,8 @@
 }
 
 ::-webkit-scrollbar {
-    width: 8px; /* 滚动条宽度 */
-    height: 8px; /* 滚动条高度 */
+    width: 7px; /* 滚动条宽度 */
+    height: 7px; /* 滚动条高度 */
 }
 
 /* 滚动条轨道颜色 */

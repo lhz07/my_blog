@@ -3,6 +3,7 @@ file_name = 'implement-retain_mut_value'
 description = '用多种方式实现一个可以获取所有权的 retain_mut 方法'
 tags = ['Rust', 'Vec', 'retain', 'Programming', 'Create']
 posted = '2025-10-7T23:03:40+08:00'
+updated = '2025-10-7T23:03:40+08:00'
 estimated_reading_time = 30
 author = 'lhz07'
 cover_image = "/static/img/posts/analyze-the-retain-method-of-Vec/cover.webp"

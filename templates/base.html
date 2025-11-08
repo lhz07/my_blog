@@ -143,7 +143,12 @@
       <a
         href="/friend_links"
         class="transition-colors duration-200 {% if page == 'friend_links' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
-        >Friend Links</a
+        >Friends</a
+      >
+      <a
+        href="/archives"
+        class="transition-colors duration-200 {% if page == 'archives' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
+        >Archives</a
       >
     </nav>
   </div>
@@ -155,27 +160,54 @@
       class="sm:hidden absolute font-cursive text-2xl left-6 hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200 transition-all"
       >lhz07's blog</a
     >
-    <nav class="sm:flex hidden space-x-8 text-lg font-medium">
+    <nav class="sm:flex hidden text-lg font-medium items-center">
       <a
         href="/"
-        class="transition-colors duration-200 {% if page == 'home' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
+        class="mx-4 transition-colors duration-200 {% if page == 'home' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
         >Home</a
       >
       <a
         href="/search"
-        class="transition-colors duration-200 {% if page == 'search' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
+        class="mx-4 transition-colors duration-200 {% if page == 'search' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
         >Search</a
       >
       <a
         href="/about"
-        class="transition-colors duration-200 {% if page == 'about' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
+        class="mx-4 transition-colors duration-200 {% if page == 'about' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
         >About</a
       >
       <a
         href="/friend_links"
-        class="transition-colors duration-200 {% if page == 'friend_links' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
-        >Friend Links</a
+        class="mx-4 transition-colors duration-200 {% if page == 'friend_links' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
+        >Friends</a
       >
+      <a href="/archives">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          class="mx-2 transition-colors duration-200 {% if page == 'archives' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
+        >
+          <path
+            d="M3 4m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          ></path>
+          <path
+            d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          ></path>
+          <path
+            d="M10 12l4 0"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          ></path>
+        </svg>
+      </a>
     </nav>
     <button
       id="hamburger-toggle"

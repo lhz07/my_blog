@@ -1,8 +1,9 @@
-title = 'Vec的retain方法分析'
+title = 'Vec 的 retain 方法分析'
 file_name = 'analyze-the-retain-method-of-Vec'
-description = '简单分析Rust中Vec的retain方法的实现'
+description = '简单分析 Rust 中 Vec 的 retain 方法的实现'
 tags = ['Rust', 'Vec', 'retain', 'Programming', 'Analyze']
 posted = '2025-09-23T20:15:07+08:00'
+updated = '2025-09-23T20:15:07+08:00'
 estimated_reading_time = 12
 author = 'lhz07'
 cover_image = "/static/img/posts/analyze-the-retain-method-of-Vec/cover.webp"

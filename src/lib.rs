@@ -1,3 +1,7 @@
+use crate::{
+    errors::{CatError, RespError},
+    lock::Lock,
+};
 use actix_files::Files;
 use actix_web::{
     App, HttpResponse, HttpServer,
@@ -14,11 +18,6 @@ use std::{
     sync::{Arc, LazyLock},
 };
 use tera::Tera;
-
-use crate::{
-    errors::{CatError, RespError},
-    lock::Lock,
-};
 
 pub mod errors;
 pub mod handlers;
@@ -111,6 +110,7 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, io::Error> {
             .service(handlers::search_lucky)
             .service(handlers::friend_links)
             .service(handlers::post_link)
+            .service(handlers::archive)
             .service(handlers::about)
     })
     .listen(listener)?

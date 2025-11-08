@@ -1,8 +1,5 @@
 use crate::{
-    CONTEXT,
-    errors::RespError,
-    handlers::post_handler::SORTED_FRONTMATTERS,
-    lock::Lock,
+    CONTEXT, errors::RespError, handlers::post_handler::SORT_BY_UPDATED_FRONTMATTERS, lock::Lock,
     timestamp::TimeStamp,
 };
 use actix_web::{HttpResponse, get, web};
@@ -18,6 +15,7 @@ pub struct FrontMatter {
     pub file_name: String,
     pub description: String,
     pub posted: TimeStamp,
+    pub updated: TimeStamp,
     pub tags: Vec<String>,
     pub author: String,
     pub estimated_reading_time: u32,
@@ -28,7 +26,7 @@ pub struct FrontMatter {
 pub async fn index(templates: web::Data<Arc<Lock<Tera>>>) -> Result<HttpResponse, RespError> {
     let mut context = CONTEXT.clone();
 
-    let frontmatters = SORTED_FRONTMATTERS.get();
+    let frontmatters = SORT_BY_UPDATED_FRONTMATTERS.get();
     let page_count = frontmatters.len().div_ceil(POSTS_PER_PAGE);
     let frontmatters = frontmatters.iter().take(POSTS_PER_PAGE).collect::<Vec<_>>();
     context.insert("posts", &frontmatters);
@@ -44,7 +42,7 @@ pub async fn page(
     templates: web::Data<Arc<Lock<Tera>>>,
     page_num: web::Path<usize>,
 ) -> Result<HttpResponse, RespError> {
-    let frontmatters = SORTED_FRONTMATTERS.get();
+    let frontmatters = SORT_BY_UPDATED_FRONTMATTERS.get();
     let page_count = frontmatters.len().div_ceil(POSTS_PER_PAGE);
     let page_num = page_num.into_inner();
     if page_num > page_count || page_num < 1 {

@@ -51,7 +51,7 @@ pub fn initial_fm() -> Result<HashMap<String, Arc<FrontMatter>>, CatError> {
     Ok(map)
 }
 
-pub fn initial_sorted_fm() -> Vec<Arc<FrontMatter>> {
+pub fn initial_sort_by_posted_fm() -> Vec<Arc<FrontMatter>> {
     let mut fms = FRONTMATTER
         .get()
         .values()
@@ -61,8 +61,21 @@ pub fn initial_sorted_fm() -> Vec<Arc<FrontMatter>> {
     fms
 }
 
-pub static SORTED_FRONTMATTERS: LazyLock<Lock<Vec<Arc<FrontMatter>>>> =
-    LazyLock::new(|| Lock::new(initial_sorted_fm()));
+pub fn initial_sort_by_updated_fm() -> Vec<Arc<FrontMatter>> {
+    let mut fms = FRONTMATTER
+        .get()
+        .values()
+        .cloned()
+        .collect::<Vec<Arc<FrontMatter>>>();
+    fms.sort_by(|a, b| b.updated.cmp(&a.updated));
+    fms
+}
+
+pub static SORT_BY_POSTED_FRONTMATTERS: LazyLock<Lock<Vec<Arc<FrontMatter>>>> =
+    LazyLock::new(|| Lock::new(initial_sort_by_posted_fm()));
+
+pub static SORT_BY_UPDATED_FRONTMATTERS: LazyLock<Lock<Vec<Arc<FrontMatter>>>> =
+    LazyLock::new(|| Lock::new(initial_sort_by_updated_fm()));
 
 pub fn extract_md(post_name: &str) -> Result<String, CatError> {
     let s = fs::read_to_string(format!("./posts/{}/post.md", post_name))?;
@@ -107,16 +120,16 @@ pub async fn post(
     }
     context.insert("post", &md_html);
     context.insert("meta_data", frontmatter.as_ref());
-    let index = SORTED_FRONTMATTERS
+    let index = SORT_BY_POSTED_FRONTMATTERS
         .get()
         .iter()
         .position(|f| f.file_name == frontmatter.file_name);
     if let Some(index) = index {
-        if let Some(next) = SORTED_FRONTMATTERS.get().get(index + 1) {
+        if let Some(next) = SORT_BY_POSTED_FRONTMATTERS.get().get(index + 1) {
             context.insert("next", next);
         }
         if index > 0 {
-            let prev = &SORTED_FRONTMATTERS.get()[index - 1];
+            let prev = &SORT_BY_POSTED_FRONTMATTERS.get()[index - 1];
             context.insert("prev", prev);
         }
     }
