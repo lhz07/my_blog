@@ -9,7 +9,6 @@ use actix_web::{
     middleware::{self, Compress},
     web,
 };
-use once_cell::sync::Lazy;
 use rand::seq::IndexedRandom;
 use std::{
     fs, io,
@@ -28,11 +27,11 @@ pub mod timestamp;
 #[cfg(debug_assertions)]
 pub mod socket;
 
-static TEMPLATES: LazyLock<Arc<Lock<Tera>>> = LazyLock::new(|| {
+pub static TEMPLATES: LazyLock<Arc<Lock<Tera>>> = LazyLock::new(|| {
     let mut tera = match Tera::new("templates/**/*.html") {
         Ok(t) => t,
         Err(e) => {
-            println!("Parsing error(s): {}", e);
+            log::error!("Parsing error(s): {}", e);
             std::process::exit(1);
         }
     };
@@ -41,7 +40,7 @@ static TEMPLATES: LazyLock<Arc<Lock<Tera>>> = LazyLock::new(|| {
     Arc::new(lock)
 });
 
-pub static CONTEXT: Lazy<tera::Context> = Lazy::new(|| {
+pub static CONTEXT: LazyLock<tera::Context> = LazyLock::new(|| {
     #[cfg(debug_assertions)]
     {
         let mut context = tera::Context::new();
@@ -54,7 +53,7 @@ pub static CONTEXT: Lazy<tera::Context> = Lazy::new(|| {
     }
 });
 
-pub static MD_OPTIONS: Lazy<comrak::Options> = Lazy::new(|| {
+pub static MD_OPTIONS: LazyLock<comrak::Options> = LazyLock::new(|| {
     let mut options = comrak::Options::default();
     options.render.hardbreaks = true;
     options.extension.table = true;
@@ -106,6 +105,7 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, io::Error> {
             .service(handlers::index)
             .service(handlers::page)
             .service(handlers::post)
+            .service(handlers::archive_post)
             .service(handlers::search)
             .service(handlers::search_lucky)
             .service(handlers::friend_links)

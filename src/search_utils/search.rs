@@ -7,12 +7,11 @@ use crate::{
     },
 };
 use actix_web::web;
-use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::Serialize;
 use std::{
     collections::HashSet,
-    sync::Arc,
+    sync::{Arc, LazyLock},
     time::{Duration, Instant},
 };
 use tantivy::{
@@ -50,12 +49,12 @@ impl<T> Default for SearchResult<T> {
 
 /// detect whether a token contains any CJK character
 pub fn contains_cjk(s: &str) -> bool {
-    static RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"^[\p{Han}]+$").unwrap());
+    static RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[\p{Han}]+$").unwrap());
     RE.is_match(s)
 }
 
 pub fn is_cjk_or_en(s: &str) -> bool {
-    static RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"^[A-Za-z\p{Han}]+$").unwrap());
+    static RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[A-Za-z\p{Han}]+$").unwrap());
     RE.is_match(s)
 }
 
@@ -84,7 +83,7 @@ pub async fn search_index(
     let path_field = schema.get_field("path")?;
 
     let searcher = READER.searcher();
-    println!("{:?}", instant_sum.elapsed());
+    log::info!("{:?}", instant_sum.elapsed());
 
     let mut jieba_analyzer = JIEBA_ANALYZER.clone();
     let mut token_stream = jieba_analyzer.token_stream(query_text);
@@ -96,7 +95,7 @@ pub async fn search_index(
     }
 
     if tokens.is_empty() {
-        println!("empty query");
+        log::info!("empty query");
         return Ok(SearchResult::default());
     }
     // phrase query
@@ -120,7 +119,7 @@ pub async fn search_index(
         tokens
     };
 
-    println!("tokens: {:?}", tokens);
+    log::info!("tokens: {:?}", tokens);
     let mut clauses: Vec<(Occur, Box<dyn Query>)> = vec![];
 
     for tk in tokens.iter() {
@@ -161,7 +160,7 @@ pub async fn search_index(
         }
     }
 
-    println!("basic query");
+    log::info!("basic query");
 
     let mut boolean_query = BooleanQuery::from(clauses);
     // boost proximity matches
@@ -195,7 +194,7 @@ pub async fn search_index(
     )?;
 
     if top_docs.is_empty() {
-        println!("No results");
+        log::info!("No results");
         return Ok(SearchResult::default());
     }
     let mut zh_snippet_gen =
@@ -205,7 +204,7 @@ pub async fn search_index(
     let mut search_futures = Vec::with_capacity(top_docs.len());
     // get total matched results count
     let count = searcher.search(&boolean_query, &tantivy::collector::Count)?;
-    println!("total matched: {}", count);
+    log::info!("total matched: {}", count);
     for (score, doc_addr) in top_docs {
         let doc: TantivyDocument = searcher.doc(doc_addr)?;
         let zh_gen = zh_snippet_gen.clone();
@@ -223,7 +222,7 @@ pub async fn search_index(
             // through testing, we find that snippet is a very expensive operation
             let ins = Instant::now();
             let snippet_zh = zh_gen.snippet(text_zh);
-            println!("Snippet gen took: {:?}", ins.elapsed());
+            log::info!("Snippet gen took: {:?}", ins.elapsed());
 
             let fm = extract_frontmatter(file_name)?;
             let res = SearchTerm {
@@ -231,8 +230,8 @@ pub async fn search_index(
                 fm,
                 snippet: snippet_zh.to_html().trim().to_string(),
             };
-            println!("---\nscore: {:.3} title: {}", res.score, res.fm.title);
-            println!("HTML snippet:\n{}\n", res.snippet);
+            log::info!("---\nscore: {:.3} title: {}", res.score, res.fm.title);
+            log::info!("HTML snippet:\n{}\n", res.snippet);
             Ok::<SearchTerm, CatError>(res)
         };
         let fut = web::block(generate_snippet);
@@ -245,7 +244,7 @@ pub async fn search_index(
         .collect::<Result<_, _>>()?;
 
     let duration = instant_sum.elapsed();
-    println!("Search took: {:?}", duration);
+    log::info!("Search took: {:?}", duration);
     let search_result = SearchResult {
         time_cost: duration,
         count,
@@ -280,12 +279,12 @@ pub fn search_tags(
         &TopDocs::with_limit(limit).and_offset(offset),
     )?;
     if top_docs.is_empty() {
-        println!("No results");
+        log::info!("No results");
         return Ok(SearchResult::default());
     }
     // get total matched results count
     let count = searcher.search(&tag_boolean_query, &tantivy::collector::Count)?;
-    println!("total matched: {}", count);
+    log::info!("total matched: {}", count);
     let mut terms = Vec::with_capacity(top_docs.len());
     for (_, doc_addr) in top_docs {
         let doc: TantivyDocument = searcher.doc(doc_addr)?;
@@ -297,7 +296,7 @@ pub fn search_tags(
         terms.push(fm);
     }
     let time_cost = instant_sum.elapsed();
-    println!("Search took: {:?}", time_cost);
+    log::info!("Search took: {:?}", time_cost);
     let search_result = SearchResult {
         count,
         time_cost,

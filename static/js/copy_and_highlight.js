@@ -93,6 +93,8 @@ function generateTOC(containerSelector = "#toc") {
   }
 
   if (tocContainer) {
+    tocContainer.classList.remove("hidden");
+    tocToggleButton.classList.remove("hidden");
     tocContainer.innerHTML = "";
     tocContainer.appendChild(tocRoot);
   }

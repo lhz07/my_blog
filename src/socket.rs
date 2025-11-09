@@ -9,6 +9,8 @@ use crate::{
     },
 };
 use actix_web::rt::net::TcpStream;
+use num_derive::FromPrimitive;
+use num_traits::FromPrimitive;
 use std::io;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
@@ -18,38 +20,64 @@ pub async fn run() {
     }
 }
 
+#[derive(Debug, FromPrimitive)]
+enum Msg {
+    Reload = 1,
+    Success,
+    Error,
+    Exit,
+}
+
 async fn connect() -> Result<(), io::Error> {
     let mut stream = TcpStream::connect("127.0.0.1:9002").await?;
-    println!("Connected to the server: {:?}", stream.peer_addr()?);
+    log::info!("Connected to the server: {:?}", stream.peer_addr()?);
     let mut buf = [0u8; 1];
     loop {
         stream.read_exact(&mut buf).await?;
-        if buf[0] == 1 {
-            let ins = std::time::Instant::now();
-            // reload tera templates
-            if let Err(e) = TEMPLATES.get_mut().full_reload() {
-                eprintln!("tera error: {e}");
-                buf[0] = 10;
+        let msg = Msg::from_u8(buf[0]);
+        match msg {
+            Some(Msg::Reload) => {
+                match reload() {
+                    Ok(()) => {
+                        buf[0] = Msg::Success as u8;
+                    }
+                    Err(()) => {
+                        buf[0] = Msg::Error as u8;
+                    }
+                }
                 stream.write_all(&mut buf).await?;
-                continue;
             }
-            // reload fms
-            match initial_fm() {
-                Ok(map) => *FRONTMATTER.get_mut() = map,
-                Err(e) => eprintln!("frontmatter error: {e}"),
+            Some(Msg::Exit) => {
+                log::info!("Exit command received. Closing connection.");
+                return Ok(());
             }
-            // reload sorted fms
-            *SORT_BY_POSTED_FRONTMATTERS.get_mut() = initial_sort_by_posted_fm();
-            *SORT_BY_UPDATED_FRONTMATTERS.get_mut() = initial_sort_by_updated_fm();
-            // reload archives
-            match init_archives() {
-                Ok(map) => *ARCHIVES.get_mut() = map,
-                Err(e) => eprintln!("archives error: {e}"),
+            _ => {
+                eprintln!("unexpected message received: {:?}", msg);
             }
-            println!("tera cost: {:?}", ins.elapsed());
-            println!("Templates reloaded.");
-            buf[0] = 2;
-            stream.write_all(&mut buf).await?;
         }
     }
+}
+
+fn reload() -> Result<(), ()> {
+    let ins = std::time::Instant::now();
+    // reload tera templates
+    TEMPLATES.get_mut().full_reload().map_err(|e| {
+        eprintln!("tera error: {e}");
+    })?;
+    // reload fms
+    let map = initial_fm().map_err(|e| {
+        eprintln!("frontmatter error: {e}");
+    })?;
+    *FRONTMATTER.get_mut() = map;
+    // reload sorted fms
+    *SORT_BY_POSTED_FRONTMATTERS.get_mut() = initial_sort_by_posted_fm();
+    *SORT_BY_UPDATED_FRONTMATTERS.get_mut() = initial_sort_by_updated_fm();
+    let map = init_archives().map_err(|e| {
+        eprintln!("archives error: {e}");
+    })?;
+    // reload archives
+    *ARCHIVES.get_mut() = map;
+    log::info!("tera cost: {:?}", ins.elapsed());
+    log::info!("Templates reloaded.");
+    Ok(())
 }

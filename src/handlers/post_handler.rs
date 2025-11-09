@@ -4,7 +4,7 @@ use crate::{
     handlers::home_handler::FrontMatter,
     lock::Lock,
 };
-use actix_web::{HttpRequest, HttpResponse, get, web};
+use actix_web::{HttpResponse, get, web};
 use ignore::{WalkBuilder, types::TypesBuilder};
 use std::{
     collections::HashMap,
@@ -100,7 +100,24 @@ pub fn extract_frontmatter(post_name: &str) -> Result<Arc<FrontMatter>, CatError
 pub async fn post(
     templates: web::Data<Arc<Lock<Tera>>>,
     post_name: web::Path<String>,
-    request: HttpRequest,
+) -> Result<HttpResponse, RespError> {
+    render_a_post(
+        templates,
+        post_name,
+        &SORT_BY_UPDATED_FRONTMATTERS,
+        "/",
+        "Home",
+        "/posts",
+    )
+}
+
+pub fn render_a_post(
+    templates: web::Data<Arc<Lock<Tera>>>,
+    post_name: web::Path<String>,
+    fms: &Lock<Vec<Arc<FrontMatter>>>,
+    back: &str,
+    back_text: &str,
+    current: &str,
 ) -> Result<HttpResponse, RespError> {
     let mut context = CONTEXT.clone();
     let md_text = extract_md(&post_name).map_err(|e| {
@@ -110,26 +127,21 @@ pub async fn post(
     let frontmatter = extract_frontmatter(&post_name).inspect_err(|e| eprintln!("{e}"))?;
 
     let md_html = comrak::markdown_to_html(&md_text, &MD_OPTIONS);
-    if let Some(header) = request
-        .headers()
-        .get("Referer")
-        .and_then(|h| h.to_str().ok())
-        && header != request.full_url().as_str()
-    {
-        context.insert("referer", header);
-    }
     context.insert("post", &md_html);
     context.insert("meta_data", frontmatter.as_ref());
-    let index = SORT_BY_POSTED_FRONTMATTERS
+    context.insert("back", back);
+    context.insert("back_text", back_text);
+    context.insert("current", current);
+    let index = fms
         .get()
         .iter()
         .position(|f| f.file_name == frontmatter.file_name);
     if let Some(index) = index {
-        if let Some(next) = SORT_BY_POSTED_FRONTMATTERS.get().get(index + 1) {
+        if let Some(next) = fms.get().get(index + 1) {
             context.insert("next", next);
         }
         if index > 0 {
-            let prev = &SORT_BY_POSTED_FRONTMATTERS.get()[index - 1];
+            let prev = &fms.get()[index - 1];
             context.insert("prev", prev);
         }
     }

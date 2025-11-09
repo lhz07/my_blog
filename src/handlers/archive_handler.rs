@@ -1,7 +1,10 @@
 use crate::{
     CONTEXT,
     errors::{CatError, RespError},
-    handlers::{home_handler::FrontMatter, post_handler::SORT_BY_POSTED_FRONTMATTERS},
+    handlers::{
+        home_handler::FrontMatter,
+        post_handler::{SORT_BY_POSTED_FRONTMATTERS, render_a_post},
+    },
     lock::Lock,
 };
 use actix_web::{HttpResponse, get, web};
@@ -86,4 +89,19 @@ pub async fn archive(templates: web::Data<Arc<Lock<Tera>>>) -> Result<HttpRespon
     context.insert("archives", &*archives);
     let html = templates.get().render("archives.html", &context)?;
     Ok(HttpResponse::Ok().content_type("text/html").body(html))
+}
+
+#[get("/archives/{post_name}")]
+pub async fn archive_post(
+    templates: web::Data<Arc<Lock<Tera>>>,
+    post_name: web::Path<String>,
+) -> Result<HttpResponse, RespError> {
+    render_a_post(
+        templates,
+        post_name,
+        &SORT_BY_POSTED_FRONTMATTERS,
+        "/archives",
+        "Archives",
+        "/archives",
+    )
 }

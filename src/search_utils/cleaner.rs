@@ -1,12 +1,11 @@
+use crate::MD_OPTIONS;
 use comrak::{
     Arena,
     nodes::{AstNode, NodeValue},
     parse_document,
 };
-use once_cell::sync::Lazy;
 use regex::Regex;
-
-use crate::MD_OPTIONS;
+use std::sync::LazyLock;
 
 /// Recursively walk the AST and collect only plain text.
 fn render_plain<'a>(node: &'a AstNode<'a>, output: &mut String) {
@@ -55,9 +54,9 @@ pub fn md_to_plain(md: &str) -> String {
 }
 
 pub fn preprocess_text(text: &str) -> String {
-    static RE1: Lazy<Regex> = Lazy::new(|| Regex::new(r"([a-zA-Z])(\p{Han})").unwrap());
-    static RE2: Lazy<Regex> = Lazy::new(|| Regex::new(r"(\p{Han})([a-zA-Z])").unwrap());
-    static RE3: Lazy<Regex> = Lazy::new(|| Regex::new(r"\s+").unwrap());
+    static RE1: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"([a-zA-Z])(\p{Han})").unwrap());
+    static RE2: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(\p{Han})([a-zA-Z])").unwrap());
+    static RE3: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\s+").unwrap());
     let iter1 = RE1.replace_all(text, "$1 $2");
     let iter2 = RE2.replace_all(&iter1, "$1 $2");
     RE3.replace_all(&iter2, " ").to_string()

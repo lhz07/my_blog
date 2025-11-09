@@ -7,6 +7,7 @@ mod search_handler;
 
 pub use about_handler::about;
 pub use archive_handler::archive;
+pub use archive_handler::archive_post;
 pub use friend_links_handler::{FriendRequest, friend_links, post_link};
 pub use home_handler::index;
 pub use home_handler::page;

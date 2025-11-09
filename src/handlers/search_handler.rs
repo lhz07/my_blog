@@ -6,13 +6,15 @@ use crate::{
     search_utils::search::{search_index, search_tags},
 };
 use actix_web::{HttpResponse, get, web};
-use once_cell::sync::Lazy;
 use rand::seq::IndexedRandom;
 use serde::{
     Deserialize,
     de::{self},
 };
-use std::{collections::HashSet, sync::Arc};
+use std::{
+    collections::HashSet,
+    sync::{Arc, LazyLock},
+};
 use tera::Tera;
 
 #[derive(Debug, Deserialize)]
@@ -54,7 +56,7 @@ where
     }
 }
 
-static ALL_TAGS: Lazy<Vec<String>> = Lazy::new(|| {
+static ALL_TAGS: LazyLock<Vec<String>> = LazyLock::new(|| {
     let frontmatters = SORT_BY_POSTED_FRONTMATTERS.get();
     let mut tags = HashSet::new();
     for fm in frontmatters.iter() {
@@ -71,7 +73,7 @@ fn handle_tag(
 ) -> Result<HttpResponse, RespError> {
     let mut context = CONTEXT.clone();
     context.insert("selected_tags", &tags);
-    println!("{:?}", tags);
+    log::info!("{:?}", tags);
     let result = search_tags(tags, 10, 0)?;
     // let frontmatters = find_all_frontmatters().inspect_err(|e| eprintln!("{e}"))?;
     // let mut filtered_posts = filter_tags(tags, frontmatters);
@@ -101,7 +103,7 @@ async fn handle_query_text(
     if let Some(tags) = &tags {
         context.insert("selected_tags", tags);
     }
-    println!("{}", query_text);
+    log::info!("{}", query_text);
     let search_result = search_index(&query_text, tags, 10, 0)
         .await
         .inspect_err(|e| eprintln!("{e}"))?;
@@ -125,7 +127,7 @@ pub async fn search(
     templates: web::Data<Arc<Lock<Tera>>>,
     query: web::Query<QueryParam>,
 ) -> Result<HttpResponse, RespError> {
-    println!("query: {:?}", query);
+    log::info!("query: {:?}", query);
     match (query.0.tag, query.0.q) {
         (Some(tags), None) => handle_tag(templates, tags),
         (tags, Some(query_text)) => handle_query_text(templates, query_text, tags).await,

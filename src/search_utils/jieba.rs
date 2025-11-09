@@ -1,4 +1,5 @@
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
+
 use tantivy::tokenizer::{
     LowerCaser, RemoveLongFilter, Stemmer, StopWordFilter, TextAnalyzer, Token, TokenStream,
     Tokenizer,
@@ -110,9 +111,9 @@ impl JiebaTokenizer {
     }
 }
 
-pub static JIEBA: Lazy<jieba_rs::Jieba> = Lazy::new(jieba_rs::Jieba::new);
+pub static JIEBA: LazyLock<jieba_rs::Jieba> = LazyLock::new(jieba_rs::Jieba::new);
 
-pub static JIEBA_ANALYZER: Lazy<TextAnalyzer> = Lazy::new(|| {
+pub static JIEBA_ANALYZER: LazyLock<TextAnalyzer> = LazyLock::new(|| {
     tantivy::tokenizer::TextAnalyzer::builder(JiebaTokenizer::with_mode(JiebaMode::CutAll))
         .filter(RemoveLongFilter::limit(40))
         .filter(STOP_WORD_FILTER_ZH.clone())
