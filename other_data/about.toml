@@ -31,4 +31,4 @@ icon_dark = "/static/img/matrix_dark.svg"
 [profile]
 subtitle = "A student who loves programming"
 description = "Explicit is better than implicit, but readability also counts."
-pic = "/static/img/avatar.webp"
+pic = "/static/img/avatar_full.webp"

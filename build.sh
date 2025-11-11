@@ -17,5 +17,6 @@ find "./build" -type f -name ".DS_Store" | while read -r shit_file; do
     echo There is a shit, delete it: $shit_file
     rm $shit_file
 done
-tar -cf build.tar ./build && zstd build.tar && rm build.tar && mv build.tar.zst ./build/
+# we need this to avoid extended file attributes
+tar --no-xattrs --no-mac-metadata -cf build.tar ./build && zstd build.tar && rm build.tar && mv build.tar.zst ./build/
 echo "Build completed. The build artifacts are in the 'build' directory."

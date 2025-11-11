@@ -28,14 +28,14 @@ pub mod timestamp;
 pub mod socket;
 
 pub static TEMPLATES: LazyLock<Arc<Lock<Tera>>> = LazyLock::new(|| {
-    let mut tera = match Tera::new("templates/**/*.html") {
+    let mut tera = match Tera::new("templates/**/*.{html,xml}") {
         Ok(t) => t,
         Err(e) => {
             log::error!("Parsing error(s): {}", e);
             std::process::exit(1);
         }
     };
-    tera.autoescape_on(vec!["html", ".sql"]);
+    tera.autoescape_on(vec!["html"]);
     let lock = Lock::new(tera);
     Arc::new(lock)
 });
@@ -112,6 +112,8 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, io::Error> {
             .service(handlers::post_link)
             .service(handlers::archive)
             .service(handlers::about)
+            .service(handlers::favicon)
+            .service(handlers::rss)
     })
     .listen(listener)?
     .run();

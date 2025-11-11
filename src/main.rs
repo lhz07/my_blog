@@ -1,7 +1,6 @@
 use std::{io, net::TcpListener};
 
 use my_blog::start_blog;
-
 #[actix_web::main]
 async fn main() -> io::Result<()> {
     unsafe {
@@ -12,6 +11,14 @@ async fn main() -> io::Result<()> {
     }
     env_logger::init();
     initialize_static_vars();
+    #[cfg(debug_assertions)]
+    {
+        use tokio::net::UdpSocket;
+        let socket = UdpSocket::bind("0.0.0.0:0").await?;
+        socket.connect("192.168.1.1:2333").await?;
+        let local_addr = socket.local_addr()?;
+        log::info!("Local IP: {}", local_addr.ip());
+    }
     let path = "0.0.0.0:8000";
     let listener = TcpListener::bind(path)?;
     start_blog(listener)?.await?;

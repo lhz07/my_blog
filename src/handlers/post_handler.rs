@@ -6,6 +6,7 @@ use crate::{
 };
 use actix_web::{HttpResponse, get, web};
 use ignore::{WalkBuilder, types::TypesBuilder};
+use serde::Serialize;
 use std::{
     collections::HashMap,
     fs,
@@ -76,6 +77,25 @@ pub static SORT_BY_POSTED_FRONTMATTERS: LazyLock<Lock<Vec<Arc<FrontMatter>>>> =
 
 pub static SORT_BY_UPDATED_FRONTMATTERS: LazyLock<Lock<Vec<Arc<FrontMatter>>>> =
     LazyLock::new(|| Lock::new(initial_sort_by_updated_fm()));
+
+#[derive(Debug, Serialize)]
+pub struct FrontMatterWithRfc2822 {
+    pub fm: Arc<FrontMatter>,
+    pub date: String,
+}
+
+pub static SORT_BY_UPDATED_WITH_RFC2822: LazyLock<Vec<FrontMatterWithRfc2822>> =
+    LazyLock::new(|| {
+        SORT_BY_UPDATED_FRONTMATTERS
+            .get()
+            .iter()
+            .map(|fm| {
+                let fm = fm.clone();
+                let date = fm.updated.to_rfc2822();
+                FrontMatterWithRfc2822 { fm, date }
+            })
+            .collect::<Vec<FrontMatterWithRfc2822>>()
+    });
 
 pub fn extract_md(post_name: &str) -> Result<String, CatError> {
     let s = fs::read_to_string(format!("./posts/{}/post.md", post_name))?;

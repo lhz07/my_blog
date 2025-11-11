@@ -1,5 +1,11 @@
-{% extends "base.html" %} {% block title %}lhz07's blog{% endblock title %} {%
-block content %}
+{% extends "base.html" %} {% block head %}
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  title="lhz07's blog"
+  href="/index.xml"
+/>
+<title>lhz07's blog</title>{% endblock head %} {% block content %}
 <!-- Main content -->
 <main class="flex-1 container mx-auto px-6 py-10" style="max-width: 44rem">
   <div class="text-center mb-10">

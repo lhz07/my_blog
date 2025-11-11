@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>lhz07's Blog</title>
+    <link>https://lhz07.com/</link>
+    <description>lhz07's Blog</description>
+    <language>zh-cn</language>
+    <lastBuildDate>{{latest_update}}</lastBuildDate>
+    {% for post in posts %}
+    <item>
+      <title>{{post.fm.title}}</title>
+      <link>https://lhz07.com/posts/{{post.fm.file_name}}</link>
+      <guid>https://lhz07.com/posts/{{post.fm.file_name}}</guid>
+      <pubDate>{{post.date}}</pubDate>
+      <description
+      ><![CDATA[<img src={{post.fm.cover_image}} alt="Image" />
+      <p><em>{{post.fm.description}}</em></p>
+      <br>
+      {{ contents[loop.index0] | safe }}
+        <script>
+        document.querySelectorAll("pre").forEach((pre) => {
+          const wrapper = document.createElement("div");
+          wrapper.className = "code-group group";
+          pre.parentNode.insertBefore(wrapper, pre);
+          wrapper.appendChild(pre);
+          const code = pre.querySelector("code");
+          const code_name = code.className.split("-")[1];
+          const button = document.createElement("button");
+          button.style = "color: #4CAF50";
+          button.innerText = code_name;
+          button.className = "copy-btn";
+          const old = button.innerText;
+          button.addEventListener("click", () => {
+            if (code) {
+              navigator.clipboard.writeText(code.innerText).then(() => {
+                button.innerText = "Copied!";
+                setTimeout(() => (button.innerText = old), 2000);
+              });
+            }
+          });
+          pre.insertBefore(button, code);
+        });</script>
+            ]]></description>
+      </item>
+    {% endfor %}
+  </channel>
+</rss>

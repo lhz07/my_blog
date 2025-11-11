@@ -115,7 +115,7 @@
         cursor: pointer;
       }
     </style>
-    <link rel="icon" type="image/png" href="/static/img/avatar.png" />
+    <link rel="icon" type="image/png" href="/static/img/favicon.ico" />
   </head>
   {% block header %}
   <div
@@ -145,11 +145,48 @@
         class="transition-colors duration-200 {% if page == 'friend_links' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
         >Friends</a
       >
-      <a
-        href="/archives"
-        class="transition-colors duration-200 {% if page == 'archives' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
-        >Archives</a
-      >
+      <div class="flex flex-row">
+        <a href="/archives">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            class="w-6 h-6 mr-1 transition-colors duration-200 {% if page == 'archives' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
+          >
+            <path
+              d="M3 4m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            ></path>
+            <path
+              d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            ></path>
+            <path
+              d="M10 12l4 0"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            ></path>
+          </svg>
+        </a>
+        <a href="/index.xml"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="40px"
+            viewBox="0 -960 960 960"
+            width="40px"
+            fill="currentColor"
+            class="w-6 h-6 mx-2 transition-colors duration-200 hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200"
+          >
+            <path
+              d="M196.67-120q-31.67 0-54.17-22.5T120-196.67q0-31.66 22.5-54.16 22.5-22.5 54.17-22.5 31.66 0 54.16 22.5 22.5 22.5 22.5 54.16 0 31.67-22.5 54.17T196.67-120ZM750-120q-22 0-36.17-15.67-14.16-15.66-16.5-37.66-9.66-105-53.5-195.84Q600-460 530-530q-70-70-160.83-113.83-90.84-43.84-195.84-53.5-22-2.34-37.66-16.5Q120-728 120-750t16-35.83q16-13.84 37.67-11.84 125.66 9.67 234.5 61.17Q517-685 601-601q84 84 135.5 192.83 51.5 108.84 61.17 234.5 2 21.67-11.84 37.67Q772-120 750-120Zm-252 0q-21 0-36-14.83-15-14.84-18-36.5-8.33-54.34-31.83-100.84T352-355.33Q315.33-392 269.83-416.5t-99.16-32.83q-21-3.67-35.84-18.34Q120-482.33 120-503.33q0-21.34 15-35.67 15-14.33 35.33-11.67 74.34 8.67 138.5 41.17Q373-477 423-426.33q50 50.66 81.83 116.16 31.84 65.5 40.5 139.84 2.67 21-11.66 35.66Q519.33-120 498-120Z"
+            /></svg
+        ></a>
+      </div>
     </nav>
   </div>
   <header
@@ -186,7 +223,7 @@
           width="24"
           height="24"
           viewBox="0 0 24 24"
-          class="mx-2 transition-colors duration-200 {% if page == 'archives' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
+          class="w-6 h-6 mx-2 transition-colors duration-200 {% if page == 'archives' %}text-blue-600 dark:text-blue-300{% else %}hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200{% endif %}"
         >
           <path
             d="M3 4m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"
@@ -208,6 +245,19 @@
           ></path>
         </svg>
       </a>
+      <a href="/index.xml"
+        ><svg
+          xmlns="http://www.w3.org/2000/svg"
+          height="40px"
+          viewBox="0 -960 960 960"
+          width="40px"
+          fill="currentColor"
+          class="w-6 h-6 mx-2 transition-colors duration-200 hover:text-blue-600 dark:hover:text-blue-300 dark:text-slate-200"
+        >
+          <path
+            d="M196.67-120q-31.67 0-54.17-22.5T120-196.67q0-31.66 22.5-54.16 22.5-22.5 54.17-22.5 31.66 0 54.16 22.5 22.5 22.5 22.5 54.16 0 31.67-22.5 54.17T196.67-120ZM750-120q-22 0-36.17-15.67-14.16-15.66-16.5-37.66-9.66-105-53.5-195.84Q600-460 530-530q-70-70-160.83-113.83-90.84-43.84-195.84-53.5-22-2.34-37.66-16.5Q120-728 120-750t16-35.83q16-13.84 37.67-11.84 125.66 9.67 234.5 61.17Q517-685 601-601q84 84 135.5 192.83 51.5 108.84 61.17 234.5 2 21.67-11.84 37.67Q772-120 750-120Zm-252 0q-21 0-36-14.83-15-14.84-18-36.5-8.33-54.34-31.83-100.84T352-355.33Q315.33-392 269.83-416.5t-99.16-32.83q-21-3.67-35.84-18.34Q120-482.33 120-503.33q0-21.34 15-35.67 15-14.33 35.33-11.67 74.34 8.67 138.5 41.17Q373-477 423-426.33q50 50.66 81.83 116.16 31.84 65.5 40.5 139.84 2.67 21-11.66 35.66Q519.33-120 498-120Z"
+          /></svg
+      ></a>
     </nav>
     <button
       id="hamburger-toggle"

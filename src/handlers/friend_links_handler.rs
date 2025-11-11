@@ -1,15 +1,14 @@
+use crate::{
+    CONTEXT,
+    errors::{CatError, RespError},
+    lock::Lock,
+};
 use actix_web::{HttpResponse, get, post, web};
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
 use serde::{Deserialize, Serialize};
 use sha1::Digest;
 use std::{fs, sync::Arc};
 use tera::Tera;
-
-use crate::{
-    CONTEXT,
-    errors::{CatError, RespError},
-    lock::Lock,
-};
 
 #[derive(Deserialize, Serialize)]
 struct Friend {
