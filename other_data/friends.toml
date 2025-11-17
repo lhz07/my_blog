@@ -25,3 +25,23 @@ url = "https://blog.llma.top"
 # src="https://blog.llma.top/assets/images/avatar.png"
 avatar = "static/img/friends/avatar_ling.webp"
 description = "一只Tac"
+
+[[friend]]
+name = "CLoverta的博客"
+url = "https://blog.cloverta.top"
+avatar = "static/img/friends/cloverta.webp"
+description = "THINK FAST"
+
+[[friend]]
+name = "涵曦猫猫的小窝"
+url = "https://next-cat.com"
+# src="https://next-cat.com/logo"
+avatar = "static/img/friends/next_cat.webp"
+description = "一只小猫的小窝"
+
+[[friend]]
+name = "CatBox"
+url = "https://mahiro.ink"
+# src="https://mahiro.ink/upload/image_2025-10-25_22-57-27.png"
+avatar = "static/img/friends/cat_box.webp"
+description = "绘晴的猫砂盆"
