@@ -21,7 +21,7 @@ description = "AMoment 的 Blog"
 
 [[friend]]
 name = "Ling 的小窝"
-url = "https://blog.llma.top"
+url = "https://blog.llma.dev"
 # src="https://blog.llma.top/assets/images/avatar.png"
 avatar = "static/img/friends/avatar_ling.webp"
 description = "一只Tac"
