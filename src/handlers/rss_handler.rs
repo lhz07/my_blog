@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use actix_web::{HttpResponse, get, web};
+use actix_web::{HttpResponse, route, web};
 use tera::Tera;
 
 use crate::{
@@ -10,7 +10,7 @@ use crate::{
     lock::Lock,
 };
 
-#[get("/index.xml")]
+#[route("/index.xml", method = "GET", method = "HEAD")]
 pub async fn rss(templates: web::Data<Arc<Lock<Tera>>>) -> Result<HttpResponse, RespError> {
     let mut context = CONTEXT.clone();
     if let Some(first) = SORT_BY_UPDATED_WITH_RFC2822.first() {
@@ -33,7 +33,7 @@ pub async fn rss(templates: web::Data<Arc<Lock<Tera>>>) -> Result<HttpResponse, 
         .body(html))
 }
 
-#[get("/favicon.ico")]
+#[route("/favicon.ico", method = "GET", method = "HEAD")]
 async fn favicon() -> Result<HttpResponse, RespError> {
     let data = std::fs::read("static/img/favicon.ico").map_err(|e| -> CatError { e.into() })?;
     Ok(HttpResponse::Ok().content_type("image/x-icon").body(data))

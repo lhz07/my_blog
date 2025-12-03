@@ -16,31 +16,8 @@
       ><![CDATA[<img src={{post.fm.cover_image}} alt="Image" />
       <p><em>{{post.fm.description}}</em></p>
       <br>
-      {{ contents[loop.index0] | safe }}
-        <script>
-        document.querySelectorAll("pre").forEach((pre) => {
-          const wrapper = document.createElement("div");
-          wrapper.className = "code-group group";
-          pre.parentNode.insertBefore(wrapper, pre);
-          wrapper.appendChild(pre);
-          const code = pre.querySelector("code");
-          const code_name = code.className.split("-")[1];
-          const button = document.createElement("button");
-          button.style = "color: #4CAF50";
-          button.innerText = code_name;
-          button.className = "copy-btn";
-          const old = button.innerText;
-          button.addEventListener("click", () => {
-            if (code) {
-              navigator.clipboard.writeText(code.innerText).then(() => {
-                button.innerText = "Copied!";
-                setTimeout(() => (button.innerText = old), 2000);
-              });
-            }
-          });
-          pre.insertBefore(button, code);
-        });</script>
-            ]]></description>
+      {{ contents[loop.index0] | safe }}]]>
+      </description>
       </item>
     {% endfor %}
   </channel>

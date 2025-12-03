@@ -5,7 +5,7 @@ use crate::{
     errors::{CatError, RespError},
     lock::Lock,
 };
-use actix_web::{HttpResponse, get, web};
+use actix_web::{HttpResponse, route, web};
 use serde::{Deserialize, Serialize};
 use tera::Tera;
 
@@ -45,7 +45,7 @@ fn extract_about() -> Result<AboutInfo, CatError> {
     Ok(about_info)
 }
 
-#[get("/about")]
+#[route("/about", method = "GET", method = "HEAD")]
 pub async fn about(templates: web::Data<Arc<Lock<Tera>>>) -> Result<HttpResponse, RespError> {
     let mut context = CONTEXT.clone();
     let about_info = extract_about().inspect_err(|e| eprintln!("{e}"))?;

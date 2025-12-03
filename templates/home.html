@@ -130,14 +130,42 @@
     >
       Prev
     </a>
-    {% for page in range(start=1, end=page_count+1) %}
     <a
-      class="w-10 h-10 {% if page == current_page %}text-blue-600 dark:text-blue-300{% else %}dark:text-slate-100 text-gray-600{% endif %} inline-flex items-center justify-center text-sm font-medium dark:border-0 dark:bg-slate-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:text-gray-800 hover:shadow-md dark:hover:text-white dark:hover:bg-slate-500 transition duration-200 shadow-sm"
+      class="w-10 h-10 {% if 1 == current_page %}text-blue-600 dark:text-blue-300 hover:text-blue-500 dark:hover:text-blue-400{% else %}dark:text-slate-100 text-gray-600 hover:text-gray-800 dark:hover:text-white{% endif %} inline-flex items-center justify-center text-sm font-medium dark:border-0 dark:bg-slate-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:shadow-md dark:hover:bg-slate-500 transition duration-200 shadow-sm"
+      href="/pages/1"
+    >
+      1
+    </a>
+    {% if start_page > 2 %}
+    <a
+      class="w-10 h-10 dark:text-slate-100 text-gray-600 hover:text-gray-800 dark:hover:text-white inline-flex items-center justify-center text-sm font-medium dark:border-0 dark:bg-slate-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:shadow-md dark:hover:bg-slate-500 transition duration-200 shadow-sm"
+      href="/pages/{{skip_back}}"
+    >
+      ...
+    </a>
+    {% endif %} {% if page_count > 2 %} {% for page in range(start = start_page,
+    end = end_page + 1) %}
+    <a
+      class="w-10 h-10 {% if page == current_page %}text-blue-600 dark:text-blue-300 hover:text-blue-500 dark:hover:text-blue-400{% else %}dark:text-slate-100 text-gray-600 hover:text-gray-800 dark:hover:text-white{% endif %} inline-flex items-center justify-center text-sm font-medium dark:border-0 dark:bg-slate-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:shadow-md dark:hover:bg-slate-500 transition duration-200 shadow-sm"
       href="/pages/{{page}}"
     >
       {{page}}
     </a>
-    {% endfor %}
+    {% endfor %} {% endif %} {% if end_page < page_count - 1 %}
+    <a
+      class="w-10 h-10 dark:text-slate-100 text-gray-600 hover:text-gray-800 dark:hover:text-white inline-flex items-center justify-center text-sm font-medium dark:border-0 dark:bg-slate-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:shadow-md dark:hover:bg-slate-500 transition duration-200 shadow-sm"
+      href="/pages/{{skip_forward}}"
+    >
+      ...
+    </a>
+    {% endif %} {% if page_count > 1 %}
+    <a
+      class="w-10 h-10 {% if page_count == current_page %}text-blue-600 dark:text-blue-300 hover:text-blue-500 dark:hover:text-blue-400{% else %}dark:text-slate-100 text-gray-600 hover:text-gray-800 dark:hover:text-white{% endif %} inline-flex items-center justify-center text-sm font-medium dark:border-0 dark:bg-slate-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:shadow-md dark:hover:bg-slate-500 transition duration-200 shadow-sm"
+      href="/pages/{{page_count}}"
+    >
+      {{page_count}}
+    </a>
+    {% endif %}
     <a
       href="{% if current_page < page_count %}/pages/{{current_page + 1}}{% endif %}"
       class="page-btn{% if current_page >= page_count %} disabled{% endif %}"

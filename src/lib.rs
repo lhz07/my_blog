@@ -4,9 +4,10 @@ use crate::{
 };
 use actix_files::Files;
 use actix_web::{
-    App, HttpResponse, HttpServer,
-    dev::Server,
-    middleware::{self, Compress},
+    App, HttpResponse, HttpResponseBuilder, HttpServer,
+    dev::{Server, ServiceResponse},
+    http::StatusCode,
+    middleware::{self, Compress, ErrorHandlerResponse, ErrorHandlers},
     web,
 };
 use rand::seq::IndexedRandom;
@@ -70,9 +71,10 @@ async fn not_found_handler() -> Result<HttpResponse, RespError> {
     not_found_page()
 }
 
-fn not_found_page() -> Result<HttpResponse, RespError> {
+fn error_page(title: &str, mut kind: HttpResponseBuilder) -> Result<HttpResponse, RespError> {
     let mut context = CONTEXT.clone();
     context.insert("page", "not_found");
+    context.insert("title", title);
     let random_file = || -> Result<Vec<PathBuf>, CatError> {
         let mut stickers = Vec::new();
         for entry in fs::read_dir("./static/img/stickers")? {
@@ -87,9 +89,34 @@ fn not_found_page() -> Result<HttpResponse, RespError> {
         .ok_or(RespError::InternalServerError)?;
     context.insert("sticker", sticker.to_string_lossy().as_ref());
     let html = TEMPLATES.get().render("not_found.html", &context)?;
-    Ok(HttpResponse::NotFound()
-        .content_type("text/html")
-        .body(html))
+    Ok(kind.content_type("text/html").body(html))
+}
+
+fn not_found_page() -> Result<HttpResponse, RespError> {
+    error_page("Not Found", HttpResponse::NotFound())
+}
+
+fn render_400<B>(res: ServiceResponse<B>) -> Result<ErrorHandlerResponse<B>, actix_web::Error> {
+    let new_resp = error_page("Bad Request", HttpResponse::BadRequest())
+        .map_err(|e| actix_web::error::ErrorBadRequest(e))?;
+    let new_service_resp = res.into_response(new_resp.map_into_right_body());
+
+    Ok(ErrorHandlerResponse::Response(new_service_resp))
+}
+
+fn render_500<B>(res: ServiceResponse<B>) -> Result<ErrorHandlerResponse<B>, actix_web::Error> {
+    let new_resp = error_page("Internal Server Error", HttpResponse::InternalServerError())
+        .map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    let new_service_resp = res.into_response(new_resp.map_into_right_body());
+
+    Ok(ErrorHandlerResponse::Response(new_service_resp))
+}
+
+fn render_404<B>(res: ServiceResponse<B>) -> Result<ErrorHandlerResponse<B>, actix_web::Error> {
+    let new_resp = not_found_page().map_err(|e| actix_web::error::ErrorBadRequest(e))?;
+    let new_service_resp = res.into_response(new_resp.map_into_right_body());
+
+    Ok(ErrorHandlerResponse::Response(new_service_resp))
 }
 
 pub fn start_blog(listener: TcpListener) -> Result<Server, io::Error> {
@@ -99,6 +126,12 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, io::Error> {
         App::new()
             .app_data(web::Data::new(TEMPLATES.clone()))
             .default_service(web::route().to(not_found_handler))
+            .wrap(
+                ErrorHandlers::new()
+                    .handler(StatusCode::BAD_REQUEST, render_400)
+                    .handler(StatusCode::NOT_FOUND, render_404)
+                    .handler(StatusCode::INTERNAL_SERVER_ERROR, render_500),
+            )
             .service(Files::new("/static", "static/").use_last_modified(!cfg!(debug_assertions)))
             .wrap(middleware::Logger::default())
             .wrap(Compress::default())

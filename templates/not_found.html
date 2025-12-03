@@ -1,11 +1,11 @@
-{% extends "base.html" %} {% block title %}Not Found - lhz07's blog{% endblock
+{% extends "base.html" %} {% block title %}{{title}} - lhz07's blog{% endblock
 title %} {% block main %}
 <!-- Main content -->
 <main
   class="flex-col items-center container mx-auto px-6 py-10 md:max-w-3xl w-full"
 >
   <div class="flex flex-col items-center mb-10">
-    <h1 class="text-xl dark:text-slate-100 mb-8">Not Found!</h1>
+    <h1 class="text-xl dark:text-slate-100 mb-8">{{title}}!</h1>
     <img src="/static/img/stickers/{{sticker}}" class="w-[40vh] rounded-lg" />
   </div>
 </main>

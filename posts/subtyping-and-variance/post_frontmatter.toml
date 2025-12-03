@@ -1,0 +1,9 @@
+title = 'Subtyping and Variance'
+file_name = 'subtyping-and-variance'
+description = '详解 Rust 中的子类型和变型'
+tags = ['Rust', 'Variance', 'Subtyping', 'Programming', 'Analyze']
+posted = '2025-12-02T11:17:07+08:00'
+updated = '2025-12-02T11:17:07+08:00'
+estimated_reading_time = 40
+author = 'lhz07'
+cover_image = "/static/img/posts/subtyping-and-variance/cover.webp"

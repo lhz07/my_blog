@@ -13,7 +13,11 @@ async fn main() -> io::Result<()> {
     }
     env_logger::init();
     initialize_static_vars();
-    let path = "0.0.0.0:8000";
+    let path = if cfg!(debug_assertions) {
+        "0.0.0.0:8000"
+    } else {
+        "127.0.0.1:8000"
+    };
     let listener = TcpListener::bind(path)?;
     #[cfg(debug_assertions)]
     {

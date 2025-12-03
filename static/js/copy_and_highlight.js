@@ -4,7 +4,13 @@ document.querySelectorAll("pre").forEach((pre) => {
   pre.parentNode.insertBefore(wrapper, pre);
   wrapper.appendChild(pre);
   const code = pre.querySelector("code");
-  const code_name = code.className.split("-")[1];
+  let code_name = "text";
+  code.classList.forEach((cls) => {
+    if (cls.startsWith("language-")) {
+      code_name = cls.replace("language-", "");
+      return;
+    }
+  });
   const button = document.createElement("button");
   button.innerText = code_name;
   button.className = "copy-btn";

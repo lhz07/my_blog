@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use actix_web::{HttpResponse, ResponseError};
 use thiserror::Error;
 
-use crate::not_found_page;
+use crate::{error_page, not_found_page};
 
 #[derive(Debug, Error)]
 pub enum CatError {
@@ -36,6 +36,8 @@ impl CatError {
 pub enum RespError {
     #[error("404 not found")]
     NotFound,
+    #[error("400 bad request")]
+    BadRequest,
     #[error("500 server internal error")]
     InternalServerError,
     #[error("Custom error: {0}")]
@@ -64,14 +66,25 @@ impl From<tera::Error> for RespError {
 impl ResponseError for RespError {
     fn error_response(&self) -> actix_web::HttpResponse<actix_web::body::BoxBody> {
         match self {
-            Self::NotFound => not_found_page().unwrap_or(
+            Self::NotFound => not_found_page().unwrap_or_else(|_| {
                 HttpResponse::NotFound()
                     .content_type("text/html")
-                    .body("<p>Not found!</p>"),
-            ),
-            Self::InternalServerError => HttpResponse::InternalServerError()
-                .content_type("text/html")
-                .body("<p>Something went wrong!</p>"),
+                    .body("<p>Not found!</p>")
+            }),
+            Self::BadRequest => error_page("Bad Request", HttpResponse::BadRequest())
+                .unwrap_or_else(|_| {
+                    HttpResponse::BadRequest()
+                        .content_type("text/html")
+                        .body("<p>Bad Request!</p>")
+                }),
+            Self::InternalServerError => {
+                error_page("Internel Server Error", HttpResponse::InternalServerError())
+                    .unwrap_or_else(|_| {
+                        HttpResponse::InternalServerError()
+                            .content_type("text/html")
+                            .body("<p>Something went wrong!</p>")
+                    })
+            }
             Self::Custom(s) => HttpResponse::InternalServerError()
                 .content_type("text/plain")
                 .body(s.clone()),

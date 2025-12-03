@@ -253,7 +253,7 @@
 }
 
 .markdown-body th {
-    @apply bg-gray-100 dark:bg-slate-600 dark:text-slate-50 font-semibold;
+    @apply bg-gray-100 dark:bg-slate-600 dark:text-slate-50 font-semibold text-center;
 }
 
 .markdown-body img {

@@ -3,7 +3,7 @@ use crate::{
     errors::{CatError, RespError},
     lock::Lock,
 };
-use actix_web::{HttpResponse, get, post, web};
+use actix_web::{HttpResponse, post, route, web};
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
 use serde::{Deserialize, Serialize};
 use sha1::Digest;
@@ -38,7 +38,7 @@ fn extract_friend_links() -> Result<Vec<Friend>, CatError> {
     Ok(friends.friend)
 }
 
-#[get("/friend_links")]
+#[route("/friends", method = "GET", method = "HEAD")]
 pub async fn friend_links(
     templates: web::Data<Arc<Lock<Tera>>>,
 ) -> Result<HttpResponse, RespError> {

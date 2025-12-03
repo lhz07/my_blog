@@ -4,7 +4,7 @@ use crate::{
     handlers::home_handler::FrontMatter,
     lock::Lock,
 };
-use actix_web::{HttpResponse, get, web};
+use actix_web::{HttpResponse, route, web};
 use ignore::{WalkBuilder, types::TypesBuilder};
 use serde::Serialize;
 use std::{
@@ -116,7 +116,7 @@ pub fn extract_frontmatter(post_name: &str) -> Result<Arc<FrontMatter>, CatError
     Ok(fm)
 }
 
-#[get("/posts/{post_name}")]
+#[route("/posts/{post_name}", method = "GET", method = "HEAD")]
 pub async fn post(
     templates: web::Data<Arc<Lock<Tera>>>,
     post_name: web::Path<String>,

@@ -7,7 +7,7 @@ use crate::{
     },
     lock::Lock,
 };
-use actix_web::{HttpResponse, get, web};
+use actix_web::{HttpResponse, route, web};
 use chrono::Datelike;
 use indexmap::IndexMap;
 use num_derive::FromPrimitive;
@@ -81,7 +81,7 @@ pub fn init_archives() -> Result<Archives, CatError> {
     Ok(archives)
 }
 
-#[get("/archives")]
+#[route("/archives", method = "GET", method = "HEAD")]
 pub async fn archive(templates: web::Data<Arc<Lock<Tera>>>) -> Result<HttpResponse, RespError> {
     let mut context = CONTEXT.clone();
     context.insert("page", "archives");
@@ -91,7 +91,7 @@ pub async fn archive(templates: web::Data<Arc<Lock<Tera>>>) -> Result<HttpRespon
     Ok(HttpResponse::Ok().content_type("text/html").body(html))
 }
 
-#[get("/archives/{post_name}")]
+#[route("/archives/{post_name}", method = "GET", method = "HEAD")]
 pub async fn archive_post(
     templates: web::Data<Arc<Lock<Tera>>>,
     post_name: web::Path<String>,

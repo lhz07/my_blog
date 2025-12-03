@@ -70,7 +70,7 @@ lazy_static::lazy_static! {
 
 pub async fn search_index(
     query_text: &str,
-    tags: Option<HashSet<String>>,
+    tags: Option<&HashSet<String>>,
     limit: usize,
     offset: usize,
 ) -> Result<SearchResult<SearchTerm>, CatError> {
@@ -248,58 +248,6 @@ pub async fn search_index(
     let search_result = SearchResult {
         time_cost: duration,
         count,
-        terms,
-    };
-    Ok(search_result)
-}
-
-pub fn search_tags(
-    tags: HashSet<String>,
-    limit: usize,
-    offset: usize,
-) -> Result<SearchResult<Arc<FrontMatter>>, CatError> {
-    let instant_sum = Instant::now();
-
-    let schema = INDEX.schema();
-
-    let path_field = schema.get_field("path")?;
-
-    let searcher = READER.searcher();
-    let tag_facet = schema.get_field("tags")?;
-    let mut queries: Vec<(Occur, Box<dyn Query>)> = Vec::with_capacity(tags.len());
-    for tag in tags {
-        let facet = Facet::from(&format!("/{}", tag));
-        let term = Term::from_facet(tag_facet, &facet);
-        let tag_query = TermQuery::new(term, IndexRecordOption::Basic);
-        queries.push((Occur::Must, Box::new(tag_query)));
-    }
-    let tag_boolean_query = BooleanQuery::from(queries);
-    let top_docs = searcher.search(
-        &tag_boolean_query,
-        &TopDocs::with_limit(limit).and_offset(offset),
-    )?;
-    if top_docs.is_empty() {
-        log::info!("No results");
-        return Ok(SearchResult::default());
-    }
-    // get total matched results count
-    let count = searcher.search(&tag_boolean_query, &tantivy::collector::Count)?;
-    log::info!("total matched: {}", count);
-    let mut terms = Vec::with_capacity(top_docs.len());
-    for (_, doc_addr) in top_docs {
-        let doc: TantivyDocument = searcher.doc(doc_addr)?;
-        let file_name = doc
-            .get_first(path_field)
-            .and_then(|v| v.as_str())
-            .ok_or(CatError::internal("Can not get file name"))?;
-        let fm = extract_frontmatter(file_name)?;
-        terms.push(fm);
-    }
-    let time_cost = instant_sum.elapsed();
-    log::info!("Search took: {:?}", time_cost);
-    let search_result = SearchResult {
-        count,
-        time_cost,
         terms,
     };
     Ok(search_result)
