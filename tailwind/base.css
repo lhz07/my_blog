@@ -238,7 +238,7 @@
 }
 
 .markdown-body blockquote {
-    @apply border-l-4 border-gray-300 pl-4 italic text-gray-600 mb-4;
+    @apply border-l-4 border-gray-300 pl-4 italic text-gray-600 dark:text-slate-200 mb-4;
 }
 
 .markdown-body table {

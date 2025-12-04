@@ -45,7 +45,7 @@ async fn connect() -> Result<(), io::Error> {
                         buf[0] = Msg::Error as u8;
                     }
                 }
-                stream.write_all(&mut buf).await?;
+                stream.write_all(&buf).await?;
             }
             Some(Msg::Exit) => {
                 log::info!("Exit command received. Closing connection.");

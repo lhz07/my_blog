@@ -98,7 +98,7 @@ fn not_found_page() -> Result<HttpResponse, RespError> {
 
 fn render_400<B>(res: ServiceResponse<B>) -> Result<ErrorHandlerResponse<B>, actix_web::Error> {
     let new_resp = error_page("Bad Request", HttpResponse::BadRequest())
-        .map_err(|e| actix_web::error::ErrorBadRequest(e))?;
+        .map_err(actix_web::error::ErrorBadRequest)?;
     let new_service_resp = res.into_response(new_resp.map_into_right_body());
 
     Ok(ErrorHandlerResponse::Response(new_service_resp))
@@ -106,14 +106,14 @@ fn render_400<B>(res: ServiceResponse<B>) -> Result<ErrorHandlerResponse<B>, act
 
 fn render_500<B>(res: ServiceResponse<B>) -> Result<ErrorHandlerResponse<B>, actix_web::Error> {
     let new_resp = error_page("Internal Server Error", HttpResponse::InternalServerError())
-        .map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+        .map_err(actix_web::error::ErrorInternalServerError)?;
     let new_service_resp = res.into_response(new_resp.map_into_right_body());
 
     Ok(ErrorHandlerResponse::Response(new_service_resp))
 }
 
 fn render_404<B>(res: ServiceResponse<B>) -> Result<ErrorHandlerResponse<B>, actix_web::Error> {
-    let new_resp = not_found_page().map_err(|e| actix_web::error::ErrorBadRequest(e))?;
+    let new_resp = not_found_page().map_err(actix_web::error::ErrorBadRequest)?;
     let new_service_resp = res.into_response(new_resp.map_into_right_body());
 
     Ok(ErrorHandlerResponse::Response(new_service_resp))

@@ -68,11 +68,8 @@ pub async fn render_page(
         return Err(RespError::NotFound);
     }
     let mut context = CONTEXT.clone();
-    let fms = frontmatters
-        .iter()
-        .skip((page_num - 1) * POSTS_PER_PAGE)
-        .take(POSTS_PER_PAGE)
-        .collect::<Vec<_>>();
+    let fms = &frontmatters
+        [(page_num - 1) * POSTS_PER_PAGE..(page_num * POSTS_PER_PAGE).min(frontmatters.len())];
 
     PageUtil::insert(&mut context, page_num, page_count);
     context.insert("posts", &fms);

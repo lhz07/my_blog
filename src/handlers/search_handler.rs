@@ -250,7 +250,7 @@ pub async fn search_lucky(
             }
         }
         (tags, Some(query_text)) => {
-            let search_result = search_index(&query_text, tags.as_ref(), 1, 0)
+            let search_result = search_index(query_text, tags.as_ref(), 1, 0)
                 .await
                 .inspect_err(|e| eprintln!("{e}"))?;
             match search_result.terms.first() {

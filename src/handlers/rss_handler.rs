@@ -34,7 +34,7 @@ pub async fn rss(templates: web::Data<Arc<Lock<Tera>>>) -> Result<HttpResponse, 
 }
 
 #[route("/favicon.ico", method = "GET", method = "HEAD")]
-async fn favicon() -> Result<HttpResponse, RespError> {
+pub async fn favicon() -> Result<HttpResponse, RespError> {
     let data = std::fs::read("static/img/favicon.ico").map_err(|e| -> CatError { e.into() })?;
     Ok(HttpResponse::Ok().content_type("image/x-icon").body(data))
 }
