@@ -28,6 +28,12 @@ pub mod timestamp;
 #[cfg(debug_assertions)]
 pub mod socket;
 
+pub static YEAR: LazyLock<i32> = LazyLock::new(|| {
+    use chrono::Datelike;
+    let now = chrono::Local::now();
+    now.year()
+});
+
 pub static TEMPLATES: LazyLock<Arc<Lock<Tera>>> = LazyLock::new(|| {
     let mut tera = match Tera::new("templates/**/*.{html,xml}") {
         Ok(t) => t,
@@ -42,16 +48,13 @@ pub static TEMPLATES: LazyLock<Arc<Lock<Tera>>> = LazyLock::new(|| {
 });
 
 pub static CONTEXT: LazyLock<tera::Context> = LazyLock::new(|| {
+    let mut context = tera::Context::new();
     #[cfg(debug_assertions)]
     {
-        let mut context = tera::Context::new();
         context.insert("debug_mode", &true);
-        context
     }
-    #[cfg(not(debug_assertions))]
-    {
-        tera::Context::new()
-    }
+    context.insert("YEAR", &*YEAR);
+    context
 });
 
 pub static MD_OPTIONS: LazyLock<comrak::Options> = LazyLock::new(|| {
