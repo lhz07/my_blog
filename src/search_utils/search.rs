@@ -6,7 +6,7 @@ use crate::{
         jieba::{self, JIEBA_ANALYZER},
     },
 };
-use actix_web::web;
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use regex::Regex;
 use serde::Serialize;
 use std::{
@@ -200,48 +200,40 @@ pub async fn search_index(
     let mut zh_snippet_gen =
         SnippetGenerator::create(&searcher, &boolean_query, content_zh).unwrap();
     zh_snippet_gen.set_max_num_chars(200);
-    let zh_snippet_gen = Arc::new(zh_snippet_gen);
-    let mut search_futures = Vec::with_capacity(top_docs.len());
     // get total matched results count
     let count = searcher.search(&boolean_query, &tantivy::collector::Count)?;
     log::info!("total matched: {}", count);
-    for (score, doc_addr) in top_docs {
-        let doc: TantivyDocument = searcher.doc(doc_addr)?;
-        let zh_gen = zh_snippet_gen.clone();
-        let generate_snippet = move || {
-            let file_name = doc
-                .get_first(path_field)
-                .and_then(|v| v.as_str())
-                .ok_or(CatError::internal("Can not get file name"))?;
+    let terms_iter =
+        top_docs
+            .into_par_iter()
+            .map(|(score, doc_addr)| -> Result<SearchTerm, CatError> {
+                let doc: TantivyDocument = searcher.doc(doc_addr)?;
+                let file_name = doc
+                    .get_first(path_field)
+                    .and_then(|v| v.as_str())
+                    .ok_or(CatError::internal("Can not get file name"))?;
 
-            let text_zh = doc
-                .get_first(content_zh)
-                .and_then(|v| v.as_str())
-                .ok_or(CatError::internal("Can not get file content"))?;
+                let text_zh = doc
+                    .get_first(content_zh)
+                    .and_then(|v| v.as_str())
+                    .ok_or(CatError::internal("Can not get file content"))?;
 
-            // through testing, we find that snippet is a very expensive operation
-            let ins = Instant::now();
-            let snippet_zh = zh_gen.snippet(text_zh);
-            log::info!("Snippet gen took: {:?}", ins.elapsed());
+                // through testing, we find that snippet is a very expensive operation
+                let ins = Instant::now();
+                let snippet_zh = zh_snippet_gen.snippet(text_zh);
+                log::info!("Snippet gen took: {:?}", ins.elapsed());
 
-            let fm = extract_frontmatter(file_name)?;
-            let res = SearchTerm {
-                score,
-                fm,
-                snippet: snippet_zh.to_html().trim().to_string(),
-            };
-            log::info!("---\nscore: {:.3} title: {}", res.score, res.fm.title);
-            log::info!("HTML snippet:\n{}\n", res.snippet);
-            Ok::<SearchTerm, CatError>(res)
-        };
-        let fut = web::block(generate_snippet);
-        search_futures.push(fut);
-    }
-    let terms = futures::future::join_all(search_futures)
-        .await
-        .into_iter()
-        .map(|res| res.unwrap())
-        .collect::<Result<_, _>>()?;
+                let fm = extract_frontmatter(file_name)?;
+                let res = SearchTerm {
+                    score,
+                    fm,
+                    snippet: snippet_zh.to_html().trim().to_string(),
+                };
+                log::info!("---\nscore: {:.3} title: {}", res.score, res.fm.title);
+                log::info!("HTML snippet:\n{}\n", res.snippet);
+                Ok::<SearchTerm, CatError>(res)
+            });
+    let terms = terms_iter.collect::<Result<_, _>>()?;
 
     let duration = instant_sum.elapsed();
     log::info!("Search took: {:?}", duration);

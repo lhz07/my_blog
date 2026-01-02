@@ -28,7 +28,7 @@ title %} {% block scripts %}
         <img
           src="{{friend.avatar}}"
           alt="null"
-          class="w-14 h-14 rounded-full border dark:border-slate-700 bg-white"
+          class="w-14 h-14 rounded-full border dark:border-slate-700 bg-white object-cover"
         />
         <div>
           <h2
@@ -163,7 +163,8 @@ title %} {% block scripts %}
               for="avatar"
               class="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1"
             >
-              头像链接 <span class="text-red-500">*</span>
+              头像链接 (请提交比例为 1:1 的图片)
+              <span class="text-red-500">*</span>
             </label>
             <input
               type="url"
