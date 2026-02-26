@@ -59,3 +59,10 @@ url = "https://neojulietblog.netlify.app"
 # src="https://neojulietblog.netlify.app/images/avatar.JPG"
 avatar = "static/img/friends/neo_juliet.webp"
 description = "似乎来到了没有知识存在的荒原？？"
+
+[[friend]]
+name = "Farewe1ll's Blog"
+url = "https://blog.farewe1ll.com"
+# src="https://avatar.farewe1ll.top"
+avatar = "static/img/friends/fare.webp"
+description = "撥雪尋春，燒燈續晝。"

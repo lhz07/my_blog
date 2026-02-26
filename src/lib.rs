@@ -128,6 +128,7 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, io::Error> {
     let server = HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(TEMPLATES.clone()))
+            .app_data(web::JsonConfig::default().limit(10 * 1024))
             .default_service(web::route().to(not_found_handler))
             .wrap(
                 ErrorHandlers::new()
