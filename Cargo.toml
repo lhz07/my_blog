@@ -35,10 +35,12 @@ num-traits = "0.2.19"
 indexmap = { version = "2.12.1", features = ["serde"] }
 log = "0.4.29"
 rayon = "1.11.0"
+dirs = "6.0.0"
+uuid = { version = "1.21.0", features = ["v4"] }
+
 
 [features]
 default = ["dep:tokio"]
 
 [profile.release]
 strip = true
-lto = "fat"

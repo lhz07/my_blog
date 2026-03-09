@@ -22,6 +22,7 @@ use tera::Tera;
 pub mod errors;
 pub mod handlers;
 pub mod lock;
+pub mod notify;
 pub mod search_utils;
 pub mod timestamp;
 

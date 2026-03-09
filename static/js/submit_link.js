@@ -18,12 +18,15 @@ function closeModal() {
   modalOverlay.classList.add("opacity-0", "pointer-events-none");
 
   document.body.style.overflow = "auto"; // Restore scrolling
+}
+
+function resetForm() {
   submitForm.reset();
 }
 
 // Close modal events
 closeModalBtn.addEventListener("click", closeModal);
-cancelBtn.addEventListener("click", closeModal);
+cancelBtn.addEventListener("click", resetForm);
 
 // Close modal with Escape key
 document.addEventListener("keydown", (e) => {
@@ -57,6 +60,7 @@ submitForm.addEventListener("submit", async (e) => {
     if (response.ok) {
       alert("友链申请已提交，我会尽快查看（大概)");
       closeModal();
+      resetForm();
     } else if (
       response.status === 500 &&
       response.headers.get("Content-Type") == "text/plain"

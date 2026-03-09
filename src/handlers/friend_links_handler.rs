@@ -2,6 +2,7 @@ use crate::{
     CONTEXT,
     errors::{CatError, RespError},
     lock::Lock,
+    notify::NotifyV1,
 };
 use actix_web::{HttpResponse, post, route, web};
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
@@ -81,6 +82,29 @@ fn write_friend_request(value: &FriendRequest) -> Result<(), CatError> {
     fs::write(format!("../friend_requests/{file_name}.toml"), content).inspect_err(|e| {
         eprintln!("{e}");
     })?;
+    if let Err(e) = send_notification(value) {
+        log::warn!("Can not send notification, error: {e}");
+    }
+    Ok(())
+}
+
+fn send_notification(fri: &FriendRequest) -> Result<(), CatError> {
+    let mut dir =
+        dirs::data_local_dir().ok_or(CatError::Custom("Can not get data local dir".into()))?;
+    dir.push("notify");
+    if !dir.exists() {
+        fs::create_dir(&dir)?;
+    }
+    let notify = NotifyV1 {
+        level: crate::notify::Level::Notice,
+        title: format!("new friend request from {}", fri.name),
+        body: format!(
+            "You have a new friend request:\nname: {}\nurl: {}\ndescription: {}\nemail: {}",
+            fri.name, fri.url, fri.description, fri.email
+        ),
+        program: "my_blog".to_string(),
+    };
+    notify.write_to_dir(dir)?;
     Ok(())
 }
 
