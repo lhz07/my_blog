@@ -82,7 +82,7 @@
 
 @font-face {
     font-family: "GreatVibes-Regular";
-    src: url("/static/fonts/GreatVibes-Regular.ttf") format("truetype");
+    src: url("/static/fonts/smaller-great-vibes.ttf") format("truetype");
 }
 
 .active {
