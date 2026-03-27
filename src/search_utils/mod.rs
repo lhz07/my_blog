@@ -1,18 +1,13 @@
-use std::fs;
-
-use tantivy::tokenizer::StopWordFilter;
+use std::{collections::HashSet, fs, sync::LazyLock};
 
 pub mod build_index;
 pub mod cleaner;
 pub mod jieba;
 pub mod search;
 
-lazy_static::lazy_static! {
-    static ref STOP_WORD_FILTER_ZH: StopWordFilter = {
-        let file = fs::read_to_string("./search/cn_stopwords.txt").unwrap();
-        let words = file.lines().map(|s| s.to_string()).collect::<Vec<_>>();
-        StopWordFilter::remove(words)
-    };
-}
+static STOP_WORDS: LazyLock<HashSet<String>> = LazyLock::new(|| {
+    let file = fs::read_to_string("./search/cn_stopwords.txt").unwrap();
+    file.lines().map(|s| s.to_string()).collect()
+});
 
 pub const INDEX_DIR: &str = "./search/data";

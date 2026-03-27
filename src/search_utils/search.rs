@@ -2,8 +2,8 @@ use crate::{
     errors::CatError,
     handlers::{home_handler::FrontMatter, post_handler::extract_frontmatter},
     search_utils::{
-        INDEX_DIR, STOP_WORD_FILTER_ZH,
-        jieba::{self, JIEBA_ANALYZER},
+        INDEX_DIR, STOP_WORDS,
+        jieba::{self, JIEBA_ANALYZER, JIEBA_ANALYZER_SEARCH},
     },
 };
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
@@ -47,6 +47,14 @@ impl<T> Default for SearchResult<T> {
     }
 }
 
+fn is_stop_word(word: &str) -> bool {
+    STOP_WORDS.contains(word)
+}
+
+fn chars_bigger_than(word: &str, count: usize) -> bool {
+    word.chars().nth(count).is_some()
+}
+
 /// detect whether a token contains any CJK character
 pub fn contains_cjk(s: &str) -> bool {
     static RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[\p{Han}]+$").unwrap());
@@ -78,7 +86,7 @@ pub async fn search_index(
 
     let schema = INDEX.schema();
 
-    let content_zh = schema.get_field("content_zh")?;
+    let content = schema.get_field("content_zh")?;
     let title_field = schema.get_field("title")?;
     let path_field = schema.get_field("path")?;
 
@@ -87,10 +95,22 @@ pub async fn search_index(
 
     let mut jieba_analyzer = JIEBA_ANALYZER.clone();
     let mut token_stream = jieba_analyzer.token_stream(query_text);
-    let mut tokens = Vec::new();
+    let mut tokens = HashSet::new();
     while let Some(token) = token_stream.next() {
-        if !token.text.trim().is_empty() && is_cjk_or_en(&token.text) {
-            tokens.push(token.text.to_string());
+        if !token.text.trim().is_empty()
+            && is_cjk_or_en(token.text.trim())
+            && !is_stop_word(token.text.trim())
+            && chars_bigger_than(token.text.trim(), 1)
+        {
+            tokens.insert(token.text.to_string());
+        }
+    }
+    let mut jieba_search = JIEBA_ANALYZER_SEARCH.clone();
+    let mut token_stream = jieba_search.token_stream(query_text);
+    while let Some(token) = token_stream.next() {
+        if !token.text.trim().is_empty() && is_cjk_or_en(&token.text) && !is_stop_word(&token.text)
+        {
+            tokens.insert(token.text.to_string());
         }
     }
 
@@ -103,7 +123,6 @@ pub async fn search_index(
         let mut jieba_analyzer =
             TextAnalyzer::builder(jieba::JiebaTokenizer::with_mode(jieba::JiebaMode::Search))
                 .filter(RemoveLongFilter::limit(40))
-                .filter(STOP_WORD_FILTER_ZH.clone())
                 .filter(Stemmer::new(tantivy::tokenizer::Language::English))
                 .filter(StopWordFilter::new(tantivy::tokenizer::Language::English).unwrap())
                 .filter(LowerCaser)
@@ -111,8 +130,11 @@ pub async fn search_index(
         let mut token_stream = jieba_analyzer.token_stream(query_text);
         let mut tokens = Vec::new();
         while let Some(token) = token_stream.next() {
-            if !token.text.trim().is_empty() && is_cjk_or_en(&token.text) {
-                let term_cn = tantivy::Term::from_field_text(content_zh, &token.text);
+            if !token.text.trim().is_empty()
+                && is_cjk_or_en(&token.text)
+                && !is_stop_word(&token.text)
+            {
+                let term_cn = tantivy::Term::from_field_text(content, &token.text);
                 tokens.push(term_cn);
             }
         }
@@ -120,12 +142,14 @@ pub async fn search_index(
     };
 
     log::info!("tokens: {:?}", tokens);
+    log::info!("proximity subs: {:?}", proximity_subs);
+
     let mut clauses: Vec<(Occur, Box<dyn Query>)> = vec![];
 
     for tk in tokens.iter() {
         if contains_cjk(tk) {
-            // Chinese token: use exact TermQuery and boost against content_zh
-            let term = tantivy::Term::from_field_text(content_zh, tk);
+            // Chinese token: use exact TermQuery and boost against content
+            let term = tantivy::Term::from_field_text(content, tk);
             let term_title = tantivy::Term::from_field_text(title_field, tk);
             let query = BoostQuery::new(
                 Box::new(TermQuery::new(
@@ -145,7 +169,7 @@ pub async fn search_index(
             clauses.push((Occur::Should, Box::new(title_query)));
         } else {
             // short token
-            let term = tantivy::Term::from_field_text(content_zh, tk);
+            let term = tantivy::Term::from_field_text(content, tk);
             let term_title = tantivy::Term::from_field_text(title_field, tk);
             let title_query = BoostQuery::new(
                 Box::new(TermQuery::new(
@@ -197,8 +221,7 @@ pub async fn search_index(
         log::info!("No results");
         return Ok(SearchResult::default());
     }
-    let mut zh_snippet_gen =
-        SnippetGenerator::create(&searcher, &boolean_query, content_zh).unwrap();
+    let mut zh_snippet_gen = SnippetGenerator::create(&searcher, &boolean_query, content).unwrap();
     zh_snippet_gen.set_max_num_chars(200);
     // get total matched results count
     let count = searcher.search(&boolean_query, &tantivy::collector::Count)?;
@@ -214,7 +237,7 @@ pub async fn search_index(
                     .ok_or(CatError::internal("Can not get file name"))?;
 
                 let text_zh = doc
-                    .get_first(content_zh)
+                    .get_first(content)
                     .and_then(|v| v.as_str())
                     .ok_or(CatError::internal("Can not get file content"))?;
 

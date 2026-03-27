@@ -71,6 +71,16 @@ pub static MD_OPTIONS: LazyLock<comrak::Options> = LazyLock::new(|| {
     options
 });
 
+#[actix_web::get("/other_data/comment.css")]
+async fn comment_css() -> HttpResponse {
+    let css = include_str!("../other_data/comment.css");
+
+    HttpResponse::Ok()
+        .insert_header(("Content-Type", "text/css"))
+        .insert_header(("Access-Control-Allow-Origin", "*"))
+        .body(css)
+}
+
 async fn not_found_handler() -> Result<HttpResponse, RespError> {
     not_found_page()
 }
@@ -152,6 +162,7 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, io::Error> {
             .service(handlers::about)
             .service(handlers::favicon)
             .service(handlers::rss)
+            .service(comment_css)
     })
     .listen(listener)?
     .run();

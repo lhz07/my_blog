@@ -8,6 +8,21 @@
     --font-cursive: GreatVibes-Regular, cursive;
 }
 
+/* Default (light mode) */
+.giscus-frame {
+    border: none;
+    color-scheme: light;
+}
+
+/* Tailwind dark mode */
+.dark .giscus-frame {
+    color-scheme: dark;
+}
+
+/*.color-border-primary {
+    border-color: #fcba03 !important;
+}*/
+
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still

@@ -5,8 +5,6 @@ use tantivy::tokenizer::{
     Tokenizer,
 };
 
-use crate::search_utils::STOP_WORD_FILTER_ZH;
-
 pub trait JiebaTokenize {
     fn basic_tokenize<'a>(words: Vec<&'a str>) -> Vec<jieba_rs::Token<'a>> {
         let mut tokens = Vec::with_capacity(words.len());
@@ -116,7 +114,15 @@ pub static JIEBA: LazyLock<jieba_rs::Jieba> = LazyLock::new(jieba_rs::Jieba::new
 pub static JIEBA_ANALYZER: LazyLock<TextAnalyzer> = LazyLock::new(|| {
     tantivy::tokenizer::TextAnalyzer::builder(JiebaTokenizer::with_mode(JiebaMode::CutAll))
         .filter(RemoveLongFilter::limit(40))
-        .filter(STOP_WORD_FILTER_ZH.clone())
+        .filter(Stemmer::new(tantivy::tokenizer::Language::English))
+        .filter(StopWordFilter::new(tantivy::tokenizer::Language::English).unwrap())
+        .filter(LowerCaser)
+        .build()
+});
+
+pub static JIEBA_ANALYZER_SEARCH: LazyLock<TextAnalyzer> = LazyLock::new(|| {
+    tantivy::tokenizer::TextAnalyzer::builder(JiebaTokenizer::with_mode(JiebaMode::Search))
+        .filter(RemoveLongFilter::limit(40))
         .filter(Stemmer::new(tantivy::tokenizer::Language::English))
         .filter(StopWordFilter::new(tantivy::tokenizer::Language::English).unwrap())
         .filter(LowerCaser)
