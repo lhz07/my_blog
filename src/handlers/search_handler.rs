@@ -148,7 +148,6 @@ async fn handle_query_text(
         SEARCH_RESULTS_PER_PAGE,
         (page - 1) * SEARCH_RESULTS_PER_PAGE,
     )
-    .await
     .inspect_err(|e| eprintln!("{e}"))?;
 
     let time_cost = search_result.time_cost.as_secs_f64();
@@ -250,9 +249,8 @@ pub async fn search_lucky(
             }
         }
         (tags, Some(query_text)) => {
-            let search_result = search_index(query_text, tags.as_ref(), 1, 0)
-                .await
-                .inspect_err(|e| eprintln!("{e}"))?;
+            let search_result =
+                search_index(query_text, tags.as_ref(), 1, 0).inspect_err(|e| eprintln!("{e}"))?;
             match search_result.terms.first() {
                 Some(first) => Ok(HttpResponse::Found()
                     .append_header(("Location", format!("/posts/{}", first.fm.file_name)))

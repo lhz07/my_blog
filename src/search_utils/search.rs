@@ -76,7 +76,7 @@ lazy_static::lazy_static! {
     static ref READER: IndexReader = INDEX.reader().unwrap();
 }
 
-pub async fn search_index(
+pub fn search_index(
     query_text: &str,
     tags: Option<&HashSet<String>>,
     limit: usize,
@@ -226,6 +226,7 @@ pub async fn search_index(
     // get total matched results count
     let count = searcher.search(&boolean_query, &tantivy::collector::Count)?;
     log::info!("total matched: {}", count);
+    log::info!("search without snippet took: {:?}", instant_sum.elapsed());
     let terms_iter =
         top_docs
             .into_par_iter()

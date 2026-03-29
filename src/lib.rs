@@ -10,6 +10,7 @@ use actix_web::{
     middleware::{self, Compress, ErrorHandlerResponse, ErrorHandlers},
     web,
 };
+use comrak::options::{Extension, Render};
 use rand::seq::IndexedRandom;
 use std::{
     fs, io,
@@ -58,17 +59,23 @@ pub static CONTEXT: LazyLock<tera::Context> = LazyLock::new(|| {
     context
 });
 
-pub static MD_OPTIONS: LazyLock<comrak::Options> = LazyLock::new(|| {
-    let mut options = comrak::Options::default();
-    options.render.hardbreaks = true;
-    options.extension.table = true;
-    options.extension.cjk_friendly_emphasis = true;
-    options.extension.strikethrough = true;
-    options.extension.footnotes = true;
-    options.extension.tasklist = true;
-    options.extension.underline = true;
-    options.extension.superscript = true;
-    options
+pub static MD_OPTIONS: LazyLock<comrak::Options> = LazyLock::new(|| comrak::Options {
+    extension: Extension {
+        table: true,
+        cjk_friendly_emphasis: true,
+        strikethrough: true,
+        footnotes: true,
+        tasklist: true,
+        underline: true,
+        superscript: true,
+        ..Default::default()
+    },
+    render: Render {
+        hardbreaks: true,
+        r#unsafe: true,
+        ..Default::default()
+    },
+    ..Default::default()
 });
 
 #[actix_web::get("/other_data/comment.css")]

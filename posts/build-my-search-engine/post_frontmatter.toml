@@ -1,0 +1,9 @@
+title = '给博客搭建搜索系统'
+file_name = 'build-my-search-engine'
+description = '探索如何利用 Tantivy 库为博客构建高效的全文搜索系统。顺带介绍一些信息检索与 NLP 的知识。'
+tags = ['Rust', 'Tantivy', 'Search', 'Programming', 'Create', "NLP", "IR"]
+posted = '2026-03-29T18:43:34+08:00'
+updated = '2026-03-29T18:43:34+08:00'
+estimated_reading_time = 50
+author = 'lhz07'
+cover_image = "/static/img/posts/build-my-search-engine/cover.webp"
