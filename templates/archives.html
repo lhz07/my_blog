@@ -7,18 +7,18 @@ title %} {% block main %}
   <div class="text-center sm:mb-7 mb-10">
     <h1 class="text-3xl font-bold mb-4 dark:text-slate-200">Archives</h1>
   </div>
-  {% for year, archive_year in archives %}
+  {% for archive_year in archives %}
   <div>
-    <span class="text-2xl font-bold">{{year}}</span>
-    <sup class="text-sm">{{archive_year.count}}</sup>
-    {% for month, fms in archive_year.months %}
+    <span class="text-2xl font-bold">{{archive_year.0}}</span>
+    <sup class="text-sm">{{archive_year.1.count}}</sup>
+    {% for archive_month in archive_year.1.months %}
     <div class="flex flex-col sm:flex-row">
       <div class="mt-6 min-w-36 text-lg sm:my-6">
-        <span class="font-bold">{{month}}</span>
-        <sup class="text-xs">{{fms | length}}</sup>
+        <span class="font-bold">{{archive_month.0}}</span>
+        <sup class="text-xs">{{archive_month.1 | length}}</sup>
       </div>
       <ul class="w-full max-w-lg">
-        {% for fm in fms %}
+        {% for fm in archive_month.1 %}
         <li class="my-6 w-full">
           <a
             href="/archives/{{fm.file_name}}"

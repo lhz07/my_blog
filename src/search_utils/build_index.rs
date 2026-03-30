@@ -38,11 +38,13 @@ pub fn build_index() -> Result<(), CatError> {
 
     // create index folder (overwrite if exists)
     let index_path = Path::new(INDEX_DIR);
-    let processed_path = index_path.join("processed_text");
     if index_path.exists() && index_path.is_dir() {
         fs::remove_dir_all(index_path)?;
     }
     fs::create_dir_all(index_path)?;
+    #[cfg(debug_assertions)]
+    let processed_path = index_path.join("processed_text");
+    #[cfg(debug_assertions)]
     fs::create_dir(&processed_path)?;
 
     let index = Index::create_in_dir(index_path, schema.clone())?;
@@ -59,6 +61,7 @@ pub fn build_index() -> Result<(), CatError> {
         let description = preprocess_text(&fm.description);
         let text = format!("{} {}", description, text);
         // save processed text for debugging
+        #[cfg(debug_assertions)]
         fs::write(
             processed_path.join(&fm.file_name).with_extension("txt"),
             &text,
