@@ -36,7 +36,7 @@ pub static FRONTMATTER: LazyLock<Lock<HashMap<String, Arc<FrontMatter>>>> = Lazy
     let map = match initial_fm() {
         Ok(f) => f,
         Err(e) => {
-            eprintln!("Can not find frontmatters!, error: {e}");
+            log::error!("Can not find frontmatters!, error: {e}");
             std::process::exit(1);
         }
     };
@@ -141,10 +141,10 @@ pub fn render_a_post(
 ) -> Result<HttpResponse, RespError> {
     let mut context = CONTEXT.clone();
     let md_text = extract_md(&post_name).map_err(|e| {
-        eprintln!("{e}");
+        log::error!("{e}");
         RespError::NotFound
     })?;
-    let frontmatter = extract_frontmatter(&post_name).inspect_err(|e| eprintln!("{e}"))?;
+    let frontmatter = extract_frontmatter(&post_name).inspect_err(|e| log::error!("{e}"))?;
 
     let md_html = comrak::markdown_to_html(&md_text, &MD_OPTIONS);
     context.insert("post", &md_html);

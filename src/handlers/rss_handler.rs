@@ -27,7 +27,7 @@ pub async fn rss(templates: web::Data<Arc<Lock<Tera>>>) -> Result<HttpResponse, 
     let html = templates
         .get()
         .render("rss.xml", &context)
-        .inspect_err(|e| eprintln!("{e}"))?;
+        .inspect_err(|e| log::error!("{e}"))?;
     Ok(HttpResponse::Ok()
         .content_type("text/xml; charset=utf-8")
         .body(html))

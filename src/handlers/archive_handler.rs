@@ -69,7 +69,7 @@ pub type Archives = Vec<(i32, ArchiveYear)>;
 pub static ARCHIVES: LazyLock<Lock<Archives>> = LazyLock::new(|| match init_archives() {
     Ok(map) => Lock::new(map),
     Err(e) => {
-        eprintln!("{e}");
+        log::error!("{e}");
         std::process::exit(1);
     }
 });

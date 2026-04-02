@@ -66,3 +66,10 @@ url = "https://blog.farewe1ll.com"
 # src="https://avatar.farewe1ll.top"
 avatar = "static/img/friends/fare.webp"
 description = "撥雪尋春，燒燈續晝。"
+
+[[friend]]
+name = "極限風味 Blog"
+url = "https://ex-tasty.com"
+# src="https://save1.ex-tasty.com/media/tasty-icon.webp"
+avatar = "static/img/friends/tasty-icon.webp"
+description = "邪惡與極限伴您一生……🥰"

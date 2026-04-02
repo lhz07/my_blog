@@ -48,7 +48,7 @@ fn extract_about() -> Result<AboutInfo, CatError> {
 #[route("/about", method = "GET", method = "HEAD")]
 pub async fn about(templates: web::Data<Arc<Lock<Tera>>>) -> Result<HttpResponse, RespError> {
     let mut context = CONTEXT.clone();
-    let about_info = extract_about().inspect_err(|e| eprintln!("{e}"))?;
+    let about_info = extract_about().inspect_err(|e| log::error!("{e}"))?;
     context.insert("page", "about");
     context.insert("repos", &about_info.repo);
     context.insert("contacts", &about_info.contact);

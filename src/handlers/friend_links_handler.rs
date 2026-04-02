@@ -44,7 +44,7 @@ pub async fn friend_links(
     templates: web::Data<Arc<Lock<Tera>>>,
 ) -> Result<HttpResponse, RespError> {
     let mut context = CONTEXT.clone();
-    let friends = extract_friend_links().inspect_err(|e| eprintln!("{e}"))?;
+    let friends = extract_friend_links().inspect_err(|e| log::error!("{e}"))?;
     context.insert("page", "friend_links");
     context.insert("friends", &friends);
     let html = templates.get().render("friend_links.html", &context)?;
@@ -71,7 +71,7 @@ fn write_friend_request(value: &FriendRequest) -> Result<(), CatError> {
     let hash = hasher.finalize();
     let file_name = BASE64_URL_SAFE_NO_PAD.encode(hash);
     let content = toml::to_string_pretty(&value).inspect_err(|e| {
-        eprintln!("{e}");
+        log::error!("{e}");
     })?;
     let dir = std::path::Path::new("../friend_requests");
     if !fs::exists(dir)? {
@@ -80,7 +80,7 @@ fn write_friend_request(value: &FriendRequest) -> Result<(), CatError> {
         return Err(CatError::custom("Too many friend requests"));
     }
     fs::write(format!("../friend_requests/{file_name}.toml"), content).inspect_err(|e| {
-        eprintln!("{e}");
+        log::error!("{e}");
     })?;
     if let Err(e) = send_notification(value) {
         log::warn!("Can not send notification, error: {e}");

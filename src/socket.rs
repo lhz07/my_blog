@@ -16,7 +16,7 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 pub async fn run() {
     if let Err(e) = connect().await {
-        eprintln!("Socket connection error: {e}");
+        log::error!("Socket connection error: {e}");
     }
 }
 
@@ -52,7 +52,7 @@ async fn connect() -> Result<(), io::Error> {
                 return Ok(());
             }
             _ => {
-                eprintln!("unexpected message received: {:?}", msg);
+                log::error!("unexpected message received: {:?}", msg);
             }
         }
     }
@@ -62,18 +62,18 @@ fn reload() -> Result<(), ()> {
     let ins = std::time::Instant::now();
     // reload tera templates
     TEMPLATES.get_mut().full_reload().map_err(|e| {
-        eprintln!("tera error: {e}");
+        log::error!("tera error: {e}");
     })?;
     // reload fms
     let map = initial_fm().map_err(|e| {
-        eprintln!("frontmatter error: {e}");
+        log::error!("frontmatter error: {e}");
     })?;
     *FRONTMATTER.get_mut() = map;
     // reload sorted fms
     *SORT_BY_POSTED_FRONTMATTERS.get_mut() = initial_sort_by_posted_fm();
     *SORT_BY_UPDATED_FRONTMATTERS.get_mut() = initial_sort_by_updated_fm();
     let map = init_archives().map_err(|e| {
-        eprintln!("archives error: {e}");
+        log::error!("archives error: {e}");
     })?;
     // reload archives
     *ARCHIVES.get_mut() = map;
