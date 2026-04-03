@@ -2,14 +2,13 @@ use crate::{
     CONTEXT,
     errors::RespError,
     handlers::{
-        home_handler::{FrontMatter, PageUtil},
+        home_handler::PageUtil,
         post_handler::{SORT_BY_POSTED_FRONTMATTERS, SORT_BY_UPDATED_FRONTMATTERS},
     },
-    lock::Lock,
-    search_utils::search::search_index,
 };
 use actix_web::{HttpRequest, HttpResponse, route, web};
 use rand::seq::IndexedRandom;
+use search_utils::{lock::Lock, post::FrontMatter, search::search_index};
 use serde::{Deserialize, de};
 use std::{
     borrow::Cow,

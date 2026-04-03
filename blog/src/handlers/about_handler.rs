@@ -1,12 +1,11 @@
-use std::sync::Arc;
-
 use crate::{
     CONTEXT,
     errors::{CatError, RespError},
-    lock::Lock,
 };
 use actix_web::{HttpResponse, route, web};
+use search_utils::{blog_path, lock::Lock};
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 use tera::Tera;
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -40,7 +39,7 @@ struct AboutInfo {
 }
 
 fn extract_about() -> Result<AboutInfo, CatError> {
-    let content = std::fs::read_to_string("./other_data/about.toml")?;
+    let content = std::fs::read_to_string(blog_path!("/other_data/about.toml"))?;
     let about_info = toml::from_str(&content)?;
     Ok(about_info)
 }

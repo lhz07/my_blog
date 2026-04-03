@@ -1,9 +1,6 @@
-use crate::{
-    CONTEXT, errors::RespError, handlers::post_handler::SORT_BY_UPDATED_FRONTMATTERS, lock::Lock,
-    timestamp::TimeStamp,
-};
+use crate::{CONTEXT, errors::RespError, handlers::post_handler::SORT_BY_UPDATED_FRONTMATTERS};
 use actix_web::{HttpResponse, route, web};
-use serde::{Deserialize, Serialize};
+use search_utils::lock::Lock;
 use std::sync::Arc;
 use tera::{Context, Tera};
 
@@ -43,19 +40,6 @@ impl PageUtil {
         context.insert("skip_back", &skip_back);
         context.insert("skip_forward", &skip_forward);
     }
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct FrontMatter {
-    pub title: String,
-    pub file_name: String,
-    pub description: String,
-    pub posted: TimeStamp,
-    pub updated: TimeStamp,
-    pub tags: Vec<String>,
-    pub author: String,
-    pub estimated_reading_time: u32,
-    pub cover_image: Option<String>,
 }
 
 pub async fn render_page(

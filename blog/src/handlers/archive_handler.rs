@@ -1,17 +1,14 @@
 use crate::{
     CONTEXT,
     errors::{CatError, RespError},
-    handlers::{
-        home_handler::FrontMatter,
-        post_handler::{SORT_BY_POSTED_FRONTMATTERS, render_a_post},
-    },
-    lock::Lock,
+    handlers::post_handler::{SORT_BY_POSTED_FRONTMATTERS, render_a_post},
 };
 use actix_web::{HttpResponse, route, web};
 use chrono::Datelike;
 use indexmap::IndexMap;
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
+use search_utils::{lock::Lock, post::FrontMatter};
 use serde::Serialize;
 use std::sync::{Arc, LazyLock};
 use strum_macros::AsRefStr;

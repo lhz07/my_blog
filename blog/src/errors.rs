@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use actix_web::{HttpResponse, ResponseError};
+use search_utils::errors::SearchError;
 use thiserror::Error;
 
 use crate::{error_page, not_found_page};
@@ -13,10 +14,6 @@ pub enum CatError {
     TomlSer(#[from] toml::ser::Error),
     #[error("IO error: {0}")]
     IO(#[from] std::io::Error),
-    #[error("Toml file error: {0}")]
-    Walker(#[from] ignore::Error),
-    #[error("Tantivy error: {0}")]
-    Search(#[from] tantivy::TantivyError),
     #[error("Internal error: {0}")]
     Internal(Cow<'static, str>),
     #[error("Custom error: {0}")]
@@ -47,18 +44,29 @@ pub enum RespError {
 impl From<CatError> for RespError {
     fn from(err: CatError) -> Self {
         match err {
-            CatError::TomlDe(_) | CatError::Walker(_) => RespError::NotFound,
-            CatError::IO(_)
-            | CatError::TomlSer(_)
-            | CatError::Search(_)
-            | CatError::Internal(_) => RespError::InternalServerError,
+            CatError::TomlDe(_) => RespError::NotFound,
+            CatError::IO(_) | CatError::TomlSer(_) | CatError::Internal(_) => {
+                RespError::InternalServerError
+            }
             CatError::Custom(s) => RespError::Custom(s),
         }
     }
 }
 
+impl From<SearchError> for RespError {
+    fn from(err: SearchError) -> Self {
+        match err {
+            SearchError::TomlDe(_) | SearchError::Walker(_) => RespError::NotFound,
+            SearchError::IO(_) | SearchError::Tantivy(_) | SearchError::Internal(_) => {
+                RespError::InternalServerError
+            }
+        }
+    }
+}
+
 impl From<tera::Error> for RespError {
-    fn from(_err: tera::Error) -> Self {
+    fn from(err: tera::Error) -> Self {
+        log::error!("tera error: {err}");
         RespError::InternalServerError
     }
 }

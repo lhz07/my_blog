@@ -1,56 +1,12 @@
-use crate::{
-    CONTEXT, MD_OPTIONS,
-    errors::{CatError, RespError},
-    handlers::home_handler::FrontMatter,
-    lock::Lock,
-};
+use crate::{CONTEXT, errors::RespError};
 use actix_web::{HttpResponse, route, web};
-use ignore::{WalkBuilder, types::TypesBuilder};
-use serde::Serialize;
-use std::{
-    collections::HashMap,
-    fs,
-    sync::{Arc, LazyLock},
+use search_utils::{
+    lock::Lock,
+    post::{FRONTMATTER, FrontMatter, MD_OPTIONS, extract_frontmatter, extract_md},
 };
+use serde::Serialize;
+use std::sync::{Arc, LazyLock};
 use tera::Tera;
-
-pub fn find_all_frontmatters() -> Result<Vec<FrontMatter>, CatError> {
-    let mut t = TypesBuilder::new();
-    t.add_defaults();
-    let toml = t.select("toml").build().unwrap();
-    let file_walker = WalkBuilder::new("./posts").types(toml).build();
-    let mut frontmatters = Vec::new();
-    for entry in file_walker {
-        let entry = entry?;
-        let path = entry.path();
-        if path.is_file() {
-            let content = fs::read_to_string(path)?;
-            let fm: FrontMatter = toml::from_str(&content)?;
-            frontmatters.push(fm);
-        }
-    }
-    Ok(frontmatters)
-}
-
-pub static FRONTMATTER: LazyLock<Lock<HashMap<String, Arc<FrontMatter>>>> = LazyLock::new(|| {
-    let map = match initial_fm() {
-        Ok(f) => f,
-        Err(e) => {
-            log::error!("Can not find frontmatters!, error: {e}");
-            std::process::exit(1);
-        }
-    };
-    Lock::new(map)
-});
-
-pub fn initial_fm() -> Result<HashMap<String, Arc<FrontMatter>>, CatError> {
-    let fm = find_all_frontmatters()?;
-    let map = fm
-        .into_iter()
-        .map(|f| (f.file_name.clone(), Arc::new(f)))
-        .collect::<HashMap<_, _>>();
-    Ok(map)
-}
 
 pub fn initial_sort_by_posted_fm() -> Vec<Arc<FrontMatter>> {
     let mut fms = FRONTMATTER
@@ -96,25 +52,6 @@ pub static SORT_BY_UPDATED_WITH_RFC2822: LazyLock<Vec<FrontMatterWithRfc2822>> =
             })
             .collect::<Vec<FrontMatterWithRfc2822>>()
     });
-
-pub fn extract_md(post_name: &str) -> Result<String, CatError> {
-    let s = fs::read_to_string(format!("./posts/{}/post.md", post_name))?;
-    Ok(s)
-}
-
-pub fn extract_frontmatter(post_name: &str) -> Result<Arc<FrontMatter>, CatError> {
-    let fm = FRONTMATTER
-        .get()
-        .get(post_name)
-        .ok_or_else(|| {
-            CatError::IO(std::io::Error::other(format!(
-                "Frontmatter for post '{}' not found",
-                post_name
-            )))
-        })?
-        .clone();
-    Ok(fm)
-}
 
 #[route("/posts/{post_name}", method = "GET", method = "HEAD")]
 pub async fn post(

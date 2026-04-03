@@ -1,7 +1,4 @@
-use crate::{
-    errors::{CatError, RespError},
-    lock::Lock,
-};
+use crate::errors::{CatError, RespError};
 use actix_files::Files;
 use actix_web::{
     App, HttpResponse, HttpResponseBuilder, HttpServer,
@@ -10,8 +7,8 @@ use actix_web::{
     middleware::{self, Compress, ErrorHandlerResponse, ErrorHandlers},
     web,
 };
-use comrak::options::{Extension, Render};
 use rand::seq::IndexedRandom;
+use search_utils::{blog_path, lock::Lock};
 use std::{
     fs, io,
     net::TcpListener,
@@ -22,10 +19,7 @@ use tera::Tera;
 
 pub mod errors;
 pub mod handlers;
-pub mod lock;
 pub mod notify;
-pub mod search_utils;
-pub mod timestamp;
 
 #[cfg(debug_assertions)]
 pub mod socket;
@@ -37,7 +31,7 @@ pub static YEAR: LazyLock<i32> = LazyLock::new(|| {
 });
 
 pub static TEMPLATES: LazyLock<Arc<Lock<Tera>>> = LazyLock::new(|| {
-    let mut tera = match Tera::new("templates/**/*.{html,xml}") {
+    let mut tera = match Tera::new(blog_path!("/templates/**/*.{html,xml}")) {
         Ok(t) => t,
         Err(e) => {
             log::error!("Parsing error(s): {}", e);
@@ -57,25 +51,6 @@ pub static CONTEXT: LazyLock<tera::Context> = LazyLock::new(|| {
     }
     context.insert("YEAR", &*YEAR);
     context
-});
-
-pub static MD_OPTIONS: LazyLock<comrak::Options> = LazyLock::new(|| comrak::Options {
-    extension: Extension {
-        table: true,
-        cjk_friendly_emphasis: true,
-        strikethrough: true,
-        footnotes: true,
-        tasklist: true,
-        underline: true,
-        superscript: true,
-        ..Default::default()
-    },
-    render: Render {
-        hardbreaks: true,
-        r#unsafe: true,
-        ..Default::default()
-    },
-    ..Default::default()
 });
 
 #[actix_web::get("/other_data/comment.css")]
@@ -98,7 +73,7 @@ fn error_page(title: &str, mut kind: HttpResponseBuilder) -> Result<HttpResponse
     context.insert("title", title);
     let random_file = || -> Result<Vec<PathBuf>, CatError> {
         let mut stickers = Vec::new();
-        for entry in fs::read_dir("./static/img/stickers")? {
+        for entry in fs::read_dir(blog_path!("/static/img/stickers"))? {
             stickers.push(entry?.path());
         }
         Ok(stickers)
@@ -154,7 +129,9 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, io::Error> {
                     .handler(StatusCode::NOT_FOUND, render_404)
                     .handler(StatusCode::INTERNAL_SERVER_ERROR, render_500),
             )
-            .service(Files::new("/static", "static/").use_last_modified(!cfg!(debug_assertions)))
+            .service(
+                Files::new("/static", "blog/static/").use_last_modified(!cfg!(debug_assertions)),
+            )
             .wrap(middleware::Logger::default())
             .wrap(Compress::default())
             .service(handlers::index)

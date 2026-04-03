@@ -3,14 +3,15 @@ use crate::{
     handlers::{
         archive_handler::{ARCHIVES, init_archives},
         post_handler::{
-            FRONTMATTER, SORT_BY_POSTED_FRONTMATTERS, SORT_BY_UPDATED_FRONTMATTERS, initial_fm,
-            initial_sort_by_posted_fm, initial_sort_by_updated_fm,
+            SORT_BY_POSTED_FRONTMATTERS, SORT_BY_UPDATED_FRONTMATTERS, initial_sort_by_posted_fm,
+            initial_sort_by_updated_fm,
         },
     },
 };
 use actix_web::rt::net::TcpStream;
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
+use search_utils::post::{FRONTMATTER, initial_fm};
 use std::io;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 

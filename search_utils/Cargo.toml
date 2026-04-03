@@ -1,0 +1,18 @@
+[package]
+name = "search_utils"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+comrak = { version = "0.51.0", default-features = false }
+regex = "1.12.2"
+serde = { version = "1.0", features = ["derive", "rc"] }
+jieba-rs = "0.8.1"
+tantivy = "0.25.0"
+rayon = "1.11.0"
+thiserror = "2.0.17"
+chrono = { version = "0.4.42", features = ["serde"] }
+log = "0.4.29"
+ignore = "0.4"
+toml = "1.1.0"
+const_format = "0.2.35"

@@ -1,6 +1,5 @@
 /target
-/tailwind/node_modules
+/blog/tailwind/node_modules
 .DS_Store
 /build
-/auto_builder
-/search/data
+/search_utils/search/data

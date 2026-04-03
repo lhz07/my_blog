@@ -1,4 +1,4 @@
-use crate::MD_OPTIONS;
+use crate::post::MD_OPTIONS;
 use comrak::{
     Arena,
     nodes::{AstNode, NodeValue},

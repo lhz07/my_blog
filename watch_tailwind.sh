@@ -1,1 +1,1 @@
-cd tailwind && npm run watch-css
+cd blog/tailwind && npm run watch-css

@@ -1,13 +1,16 @@
-use std::sync::Arc;
-
 use actix_web::{HttpResponse, route, web};
+use search_utils::{
+    blog_path,
+    lock::Lock,
+    post::{MD_OPTIONS, extract_md},
+};
+use std::sync::Arc;
 use tera::Tera;
 
 use crate::{
-    CONTEXT, MD_OPTIONS,
+    CONTEXT,
     errors::{CatError, RespError},
-    handlers::post_handler::{SORT_BY_UPDATED_WITH_RFC2822, extract_md},
-    lock::Lock,
+    handlers::post_handler::SORT_BY_UPDATED_WITH_RFC2822,
 };
 
 #[route("/index.xml", method = "GET", method = "HEAD")]
@@ -35,6 +38,7 @@ pub async fn rss(templates: web::Data<Arc<Lock<Tera>>>) -> Result<HttpResponse, 
 
 #[route("/favicon.ico", method = "GET", method = "HEAD")]
 pub async fn favicon() -> Result<HttpResponse, RespError> {
-    let data = std::fs::read("static/img/favicon.ico").map_err(|e| -> CatError { e.into() })?;
+    let data = std::fs::read(blog_path!("/static/img/favicon.ico"))
+        .map_err(|e| -> CatError { e.into() })?;
     Ok(HttpResponse::Ok().content_type("image/x-icon").body(data))
 }

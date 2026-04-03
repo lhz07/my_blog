@@ -1,11 +1,9 @@
 use crate::{
-    errors::CatError,
-    handlers::{post_handler::extract_md, post_handler::find_all_frontmatters},
-    search_utils::{
-        INDEX_DIR,
-        cleaner::{md_to_plain, preprocess_text},
-        jieba::JIEBA_ANALYZER,
-    },
+    INDEX_DIR,
+    cleaner::{md_to_plain, preprocess_text},
+    errors::SearchError,
+    jieba::JIEBA_ANALYZER,
+    post::{extract_md, find_all_frontmatters},
 };
 use std::{fs, path::Path};
 use tantivy::{
@@ -16,7 +14,7 @@ use tantivy::{
 };
 
 /// Create schema, register tokenizers, and index .txt files.
-pub fn build_index() -> Result<(), CatError> {
+pub fn build_index() -> Result<(), SearchError> {
     // schema
     let mut schema_builder = Schema::builder();
 

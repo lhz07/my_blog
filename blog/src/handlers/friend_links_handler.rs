@@ -1,11 +1,12 @@
 use crate::{
     CONTEXT,
     errors::{CatError, RespError},
-    lock::Lock,
     notify::NotifyV1,
 };
 use actix_web::{HttpResponse, post, route, web};
 use base64::{Engine, prelude::BASE64_URL_SAFE_NO_PAD};
+use search_utils::blog_path;
+use search_utils::lock::Lock;
 use serde::{Deserialize, Serialize};
 use sha1::Digest;
 use std::{fs, sync::Arc};
@@ -34,7 +35,7 @@ pub struct FriendRequest {
 }
 
 fn extract_friend_links() -> Result<Vec<Friend>, CatError> {
-    let content = fs::read_to_string("./other_data/friends.toml")?;
+    let content = fs::read_to_string(blog_path!("/other_data/friends.toml"))?;
     let friends: Friends = toml::from_str(&content)?;
     Ok(friends.friend)
 }
@@ -73,13 +74,13 @@ fn write_friend_request(value: &FriendRequest) -> Result<(), CatError> {
     let content = toml::to_string_pretty(&value).inspect_err(|e| {
         log::error!("{e}");
     })?;
-    let dir = std::path::Path::new("../friend_requests");
+    let dir = std::path::Path::new("./friend_requests");
     if !fs::exists(dir)? {
         fs::create_dir(dir)?;
     } else if count_files(dir)? > 1000 {
         return Err(CatError::custom("Too many friend requests"));
     }
-    fs::write(format!("../friend_requests/{file_name}.toml"), content).inspect_err(|e| {
+    fs::write(format!("./friend_requests/{file_name}.toml"), content).inspect_err(|e| {
         log::error!("{e}");
     })?;
     if let Err(e) = send_notification(value) {

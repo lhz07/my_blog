@@ -1,10 +1,8 @@
 use crate::{
-    errors::CatError,
-    handlers::{home_handler::FrontMatter, post_handler::extract_frontmatter},
-    search_utils::{
-        INDEX_DIR, STOP_WORDS,
-        jieba::{self, JIEBA_ANALYZER, JIEBA_ANALYZER_SEARCH},
-    },
+    INDEX_DIR, STOP_WORDS,
+    errors::SearchError,
+    jieba::{self, JIEBA_ANALYZER, JIEBA_ANALYZER_SEARCH},
+    post::{FrontMatter, extract_frontmatter},
 };
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use regex::Regex;
@@ -67,21 +65,20 @@ pub fn is_cjk_or_en(s: &str) -> bool {
 }
 
 // Use lazy static to avoid reopening the index and reloading reader every time
-lazy_static::lazy_static! {
-    static ref INDEX: Index = {
-        let index = Index::open_in_dir(INDEX_DIR).unwrap();
-        index.tokenizers().register("jieba", JIEBA_ANALYZER.clone());
-        index
-    };
-    static ref READER: IndexReader = INDEX.reader().unwrap();
-}
+
+static INDEX: LazyLock<Index> = LazyLock::new(|| {
+    let index = Index::open_in_dir(INDEX_DIR).unwrap();
+    index.tokenizers().register("jieba", JIEBA_ANALYZER.clone());
+    index
+});
+static READER: LazyLock<IndexReader> = LazyLock::new(|| INDEX.reader().unwrap());
 
 pub fn search_index(
     query_text: &str,
     tags: Option<&HashSet<String>>,
     limit: usize,
     offset: usize,
-) -> Result<SearchResult<SearchTerm>, CatError> {
+) -> Result<SearchResult<SearchTerm>, SearchError> {
     let instant_sum = Instant::now();
 
     let schema = INDEX.schema();
@@ -230,17 +227,17 @@ pub fn search_index(
     let terms_iter =
         top_docs
             .into_par_iter()
-            .map(|(score, doc_addr)| -> Result<SearchTerm, CatError> {
+            .map(|(score, doc_addr)| -> Result<SearchTerm, SearchError> {
                 let doc: TantivyDocument = searcher.doc(doc_addr)?;
                 let file_name = doc
                     .get_first(path_field)
                     .and_then(|v| v.as_str())
-                    .ok_or(CatError::internal("Can not get file name"))?;
+                    .ok_or(SearchError::internal("Can not get file name"))?;
 
                 let text_zh = doc
                     .get_first(content)
                     .and_then(|v| v.as_str())
-                    .ok_or(CatError::internal("Can not get file content"))?;
+                    .ok_or(SearchError::internal("Can not get file content"))?;
 
                 // through testing, we find that snippet is a very expensive operation
                 let ins = Instant::now();
@@ -255,7 +252,7 @@ pub fn search_index(
                 };
                 log::info!("---\nscore: {:.3} title: {}", res.score, res.fm.title);
                 log::info!("HTML snippet:\n{}\n", res.snippet);
-                Ok::<SearchTerm, CatError>(res)
+                Ok::<SearchTerm, SearchError>(res)
             });
     let terms = terms_iter.collect::<Result<_, _>>()?;
 
