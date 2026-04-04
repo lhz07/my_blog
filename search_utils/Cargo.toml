@@ -4,15 +4,25 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+# handle markdown
 comrak = { version = "0.51.0", default-features = false }
+# preprocess text
 regex = "1.12.2"
+# serialize
+toml = "1.1.0"
 serde = { version = "1.0", features = ["derive", "rc"] }
+# search
 jieba-rs = "0.8.1"
 tantivy = "0.25.0"
+# parallelize
 rayon = "1.11.0"
+# error
 thiserror = "2.0.17"
+# time
 chrono = { version = "0.4.42", features = ["serde"] }
+# log
 log = "0.4.29"
+# walk dir
 ignore = "0.4"
-toml = "1.1.0"
+# util
 const_format = "0.2.35"

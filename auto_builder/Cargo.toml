@@ -4,9 +4,12 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+# simple error handling
 anyhow = "1.0.100"
+# util
 futures = "0.3.31"
-nix = { version = "0.30.1", features = ["signal"] }
+# detect file changes
 notify = "8.2.0"
+# for tcp and websocket
 tokio = { version = "1.47.1", features = ["full"] }
 tokio-tungstenite = "0.28.0"
