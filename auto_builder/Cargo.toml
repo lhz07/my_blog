@@ -13,3 +13,4 @@ notify = "8.2.0"
 # for tcp and websocket
 tokio = { version = "1.47.1", features = ["full"] }
 tokio-tungstenite = "0.28.0"
+bitcode = "0.6.9"

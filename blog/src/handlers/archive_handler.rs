@@ -98,7 +98,7 @@ pub async fn archive(templates: web::Data<Arc<Lock<Tera>>>) -> Result<HttpRespon
     let mut context = CONTEXT.clone();
     context.insert("page", "archives");
     let archives = ARCHIVES.get();
-    context.insert("archives", &*archives);
+    context.insert("archives", &**archives);
     let html = templates
         .get()
         .render("archives.html", &context)

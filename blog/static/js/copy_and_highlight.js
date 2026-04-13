@@ -6,6 +6,9 @@ function parseRunnableDirective(codeText) {
   // first comment
   if (!firstLine.startsWith("//")) return null;
   const tokens = firstLine.slice(2).trim().split(/\s+/);
+  if (tokens[0] === "DONT_FORMAT") {
+    return "DONT_FORMAT";
+  }
   // include runnable
   if (tokens.length === 0 || tokens[0] !== "runnable") {
     return null;
@@ -189,30 +192,32 @@ document.querySelectorAll("pre").forEach((pre) => {
     const config = parseRunnableDirective(code.innerText);
     if (config) {
       code.removeChild(code.firstElementChild);
-      const runButton = document.createElement("button");
-      runButton.innerHTML = codeStartIcon;
-      runButton.className = "run-btn";
-      buttonsGroup.prepend(runButton);
-      let controller = null;
-      runButton.addEventListener("click", () => {
-        if (code) {
-          if (!controller) {
-            controller = new AbortController();
-            runButton.innerHTML = codeStopIcon;
-            runRust(code, config, runButton, controller.signal).then(() => {
-              controller = null;
-              runButton.innerHTML = codeStartIcon;
-            });
-          } else {
-            controller.abort();
-            const outputBox =
-              code.parentNode.parentNode.querySelector(".output-box");
-            if (outputBox) {
-              outputBox.classList.add("hidden");
+      if (config !== "DONT_FORMAT") {
+        const runButton = document.createElement("button");
+        runButton.innerHTML = codeStartIcon;
+        runButton.className = "run-btn";
+        buttonsGroup.prepend(runButton);
+        let controller = null;
+        runButton.addEventListener("click", () => {
+          if (code) {
+            if (!controller) {
+              controller = new AbortController();
+              runButton.innerHTML = codeStopIcon;
+              runRust(code, config, runButton, controller.signal).then(() => {
+                controller = null;
+                runButton.innerHTML = codeStartIcon;
+              });
+            } else {
+              controller.abort();
+              const outputBox =
+                code.parentNode.parentNode.querySelector(".output-box");
+              if (outputBox) {
+                outputBox.classList.add("hidden");
+              }
             }
           }
-        }
-      });
+        });
+      }
     }
     parseAnchor(code, buttonsGroup, "//");
   } else if (code_name == "c" || code_name == "cpp") {

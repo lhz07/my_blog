@@ -80,7 +80,8 @@ async fn main() -> Result<(), anyhow::Error> {
                         // println!("event: {:?}", event);
                         // Here to trigger the build process or any other action
                         let ins = Instant::now();
-                        if let Err(e) = reload_tx.send(Message::Reload(ins)).await {
+                        println!("path: {:?}", event.paths);
+                        if let Err(e) = reload_tx.send(Message::Reload(ins, event.paths)).await {
                             eprintln!("Can not send reload msg: {e}");
                         }
                         if let Err(e) = tx1.send(Bytes::new()) {

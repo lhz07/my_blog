@@ -5,6 +5,7 @@ use const_format::formatcp;
 pub mod build_index;
 pub mod cleaner;
 pub mod errors;
+pub mod formatter;
 pub mod jieba;
 pub mod lock;
 pub mod post;

@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), deny(clippy::unwrap_used))]
+
 use crate::errors::{CatError, RespError};
 use actix_files::Files;
 use actix_web::{
@@ -8,7 +10,7 @@ use actix_web::{
     web,
 };
 use rand::seq::IndexedRandom;
-use search_utils::{blog_path, lock::Lock};
+use search_utils::{blog_path, lock::Lock, post::FRONTMATTER};
 use std::{
     fs, io,
     net::TcpListener,
@@ -23,6 +25,15 @@ pub mod notify;
 
 #[cfg(debug_assertions)]
 pub mod socket;
+
+pub fn initialize_static_vars() {
+    use crate::handlers::archive_handler::ARCHIVES;
+    use std::sync::LazyLock;
+
+    LazyLock::force(&crate::TEMPLATES);
+    LazyLock::force(&ARCHIVES);
+    LazyLock::force(&FRONTMATTER);
+}
 
 pub static YEAR: LazyLock<i32> = LazyLock::new(|| {
     use chrono::Datelike;
@@ -129,9 +140,7 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, io::Error> {
                     .handler(StatusCode::NOT_FOUND, render_404)
                     .handler(StatusCode::INTERNAL_SERVER_ERROR, render_500),
             )
-            .service(
-                Files::new("/static", "blog/static/").use_last_modified(!cfg!(debug_assertions)),
-            )
+            .service(Files::new("/static", "blog/static/").use_last_modified(!cfg!(test)))
             .wrap(middleware::Logger::default())
             .wrap(Compress::default())
             .service(handlers::index)

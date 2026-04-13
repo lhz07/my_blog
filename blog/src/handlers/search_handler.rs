@@ -127,7 +127,7 @@ fn handle_tag(
     Ok(HttpResponse::Ok().content_type("text/html").body(html))
 }
 
-async fn handle_query_text(
+fn handle_query_text(
     templates: web::Data<Arc<Lock<Tera>>>,
     query_text: String,
     tags: Option<HashSet<String>>,
@@ -174,7 +174,7 @@ async fn handle_query_text(
     Ok(HttpResponse::Ok().content_type("text/html").body(html))
 }
 
-async fn search_inner(
+fn search_inner(
     templates: web::Data<Arc<Lock<Tera>>>,
     query: web::Query<QueryParam>,
     request: HttpRequest,
@@ -201,7 +201,13 @@ async fn search_inner(
                     query_pairs.append_pair(&k, &v);
                 }
             }
-            Cow::from(query_pairs.finish().query().unwrap().to_string())
+            Cow::from(
+                query_pairs
+                    .finish()
+                    .query()
+                    .expect("we have checked that query is Some")
+                    .to_string(),
+            )
         }
         None => Cow::from(""),
     };
@@ -209,7 +215,7 @@ async fn search_inner(
     match (query.0.tag, query.0.q) {
         (Some(tags), None) => handle_tag(templates, tags, page, query_param),
         (tags, Some(query_text)) => {
-            handle_query_text(templates, query_text, tags, page, query_param).await
+            handle_query_text(templates, query_text, tags, page, query_param)
         }
         (None, None) => {
             let mut context = CONTEXT.clone();
@@ -227,7 +233,7 @@ pub async fn search(
     query: web::Query<QueryParam>,
     request: HttpRequest,
 ) -> Result<HttpResponse, RespError> {
-    search_inner(templates, query, request).await
+    search_inner(templates, query, request)
 }
 
 #[route("/lucky", method = "GET", method = "HEAD")]
@@ -244,7 +250,7 @@ pub async fn search_lucky(
                 Some(luck) => Ok(HttpResponse::Found()
                     .append_header(("Location", format!("/posts/{}", luck.file_name)))
                     .finish()),
-                None => search_inner(templates, query, request).await,
+                None => search_inner(templates, query, request),
             }
         }
         (tags, Some(query_text)) => {
@@ -254,7 +260,7 @@ pub async fn search_lucky(
                 Some(first) => Ok(HttpResponse::Found()
                     .append_header(("Location", format!("/posts/{}", first.fm.file_name)))
                     .finish()),
-                None => search_inner(templates, query, request).await,
+                None => search_inner(templates, query, request),
             }
         }
         (None, None) => Ok(HttpResponse::Found()

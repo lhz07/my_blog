@@ -218,7 +218,7 @@ pub fn search_index(
         log::info!("No results");
         return Ok(SearchResult::default());
     }
-    let mut zh_snippet_gen = SnippetGenerator::create(&searcher, &boolean_query, content).unwrap();
+    let mut zh_snippet_gen = SnippetGenerator::create(&searcher, &boolean_query, content)?;
     zh_snippet_gen.set_max_num_chars(200);
     // get total matched results count
     let count = searcher.search(&boolean_query, &tantivy::collector::Count)?;

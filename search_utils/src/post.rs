@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     fs,
+    path::PathBuf,
     sync::{Arc, LazyLock},
 };
 
@@ -48,7 +49,7 @@ pub struct FrontMatter {
 pub fn find_all_frontmatters() -> Result<Vec<FrontMatter>, SearchError> {
     let mut t = TypesBuilder::new();
     t.add_defaults();
-    let toml = t.select("toml").build().unwrap();
+    let toml = t.select("toml").build()?;
     let file_walker = WalkBuilder::new(blog_path!("/posts")).types(toml).build();
     let mut frontmatters = Vec::new();
     for entry in file_walker {
@@ -61,6 +62,22 @@ pub fn find_all_frontmatters() -> Result<Vec<FrontMatter>, SearchError> {
         }
     }
     Ok(frontmatters)
+}
+
+pub fn find_all_post_paths() -> Result<Vec<PathBuf>, SearchError> {
+    let mut t = TypesBuilder::new();
+    t.add_defaults();
+    let md = t.select("md").build()?;
+    let file_walker = WalkBuilder::new(blog_path!("/posts")).types(md).build();
+    let mut mds = Vec::new();
+    for entry in file_walker {
+        let entry = entry?;
+        let path = entry.path();
+        if path.is_file() {
+            mds.push(path.to_path_buf());
+        }
+    }
+    Ok(mds)
 }
 
 pub fn extract_frontmatter(post_name: &str) -> Result<Arc<FrontMatter>, SearchError> {

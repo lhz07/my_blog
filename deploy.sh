@@ -14,10 +14,10 @@ trap recover ERR
 mkdir -p my_blog
 unzstd build.tar.zst && tar -xf build.tar
 if [ -d "my_blog/blog" ]; then
-    mv my_blog/blog_old my_blog/blog
+    mv my_blog/blog my_blog/blog_old
 fi
 if [ -d "my_blog/search_utils" ]; then
-    mv my_blog/search_utils_old my_blog/search_utils
+    mv my_blog/search_utils my_blog/search_utils_old
 fi
 mv build/* my_blog/
 chmod +x my_blog/blog/blog

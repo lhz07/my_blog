@@ -9,10 +9,16 @@ use crate::{
     },
 };
 use actix_web::rt::net::TcpStream;
-use num_derive::FromPrimitive;
-use num_traits::FromPrimitive;
-use search_utils::post::{FRONTMATTER, initial_fm};
-use std::io;
+use auto_builder::{bitcode, socket::SocketMsg};
+use search_utils::{
+    formatter::{self, ShorterPath},
+    post::{FRONTMATTER, initial_fm},
+};
+use std::{
+    io,
+    path::Path,
+    time::{self, Duration, Instant},
+};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 pub async fn run() {
@@ -21,34 +27,29 @@ pub async fn run() {
     }
 }
 
-#[derive(Debug, FromPrimitive)]
-enum Msg {
-    Reload = 1,
-    Success,
-    Error,
-    Exit,
-}
-
 async fn connect() -> Result<(), io::Error> {
     let mut stream = TcpStream::connect("127.0.0.1:9002").await?;
     log::info!("Connected to the server: {:?}", stream.peer_addr()?);
-    let mut buf = [0u8; 1];
+    let mut last_format = time::Instant::now();
     loop {
-        stream.read_exact(&mut buf).await?;
-        let msg = Msg::from_u8(buf[0]);
+        let mut len_buf = [0u8; 4];
+        stream.read_exact(&mut len_buf).await?;
+        let mut content_buf = vec![0u8; u32::from_be_bytes(len_buf) as usize];
+        stream.read_exact(&mut content_buf).await?;
+        let msg = bitcode::decode(&content_buf).map_err(io::Error::other)?;
         match msg {
-            Some(Msg::Reload) => {
-                match reload() {
-                    Ok(()) => {
-                        buf[0] = Msg::Success as u8;
-                    }
-                    Err(()) => {
-                        buf[0] = Msg::Error as u8;
-                    }
-                }
-                stream.write_all(&buf).await?;
+            SocketMsg::Reload(paths) => {
+                let msg = match reload(paths, &mut last_format) {
+                    Ok(()) => SocketMsg::Success,
+                    Err(()) => SocketMsg::Error,
+                };
+                let content = bitcode::encode(&msg);
+                stream
+                    .write_all(&(content.len() as u32).to_be_bytes())
+                    .await?;
+                stream.write_all(&content).await?;
             }
-            Some(Msg::Exit) => {
+            SocketMsg::Exit => {
                 log::info!("Exit command received. Closing connection.");
                 return Ok(());
             }
@@ -59,7 +60,7 @@ async fn connect() -> Result<(), io::Error> {
     }
 }
 
-fn reload() -> Result<(), ()> {
+fn reload(paths: Vec<String>, last_format: &mut Instant) -> Result<(), ()> {
     let ins = std::time::Instant::now();
     // reload tera templates
     TEMPLATES.get_mut().full_reload().map_err(|e| {
@@ -76,9 +77,17 @@ fn reload() -> Result<(), ()> {
     let map = init_archives().map_err(|e| {
         log::error!("archives error: {e}");
     })?;
-    // reload archives
     *ARCHIVES.get_mut() = map;
     log::info!("tera cost: {:?}", ins.elapsed());
     log::info!("Templates reloaded.");
+    if last_format.elapsed() > Duration::from_secs(3) {
+        for path in paths {
+            if let Err(e) = formatter::format_md_file(path.as_ref()) {
+                let path = Path::new(&path);
+                log::error!("format md file {}: {e}", path.shorter_path().display())
+            }
+        }
+    }
+    *last_format = time::Instant::now();
     Ok(())
 }

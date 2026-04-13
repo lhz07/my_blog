@@ -1,5 +1,4 @@
-use blog::start_blog;
-use search_utils::post::FRONTMATTER;
+use blog::{initialize_static_vars, start_blog};
 use std::{io, net::TcpListener};
 
 #[actix_web::main]
@@ -38,13 +37,4 @@ async fn main() -> io::Result<()> {
     }
     start_blog(listener)?.await?;
     Ok(())
-}
-
-fn initialize_static_vars() {
-    use blog::handlers::archive_handler::ARCHIVES;
-    use std::sync::LazyLock;
-
-    LazyLock::force(&blog::TEMPLATES);
-    LazyLock::force(&ARCHIVES);
-    LazyLock::force(&FRONTMATTER);
 }
