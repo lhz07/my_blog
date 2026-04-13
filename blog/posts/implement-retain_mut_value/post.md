@@ -6,6 +6,17 @@
 `retain_mut` 方法依靠返回的 `bool` 值判断是否需要删除，一个自然的想法是，我能不能不要返回 `bool` 值，而是返回 `Option` 呢？每次遍历的时候直接给闭包值的所有权，然后在闭包里可以选择把值取出来，并返回一个 `None`，或者不取出来，并返回一个 `Some`，里面包着原来的值。
 那么写出来大概是这样：
 ```Rust
+// runnable
+use std::ptr;
+
+struct BackshiftOnDrop<'a, T> {
+    v: &'a mut Vec<T>,
+    processed_len: usize,
+    deleted_cnt: usize,
+    original_len: usize,
+}
+
+// ANCHOR
 fn process_loop<F, T, const DELETED: bool>(
     original_len: usize,
     f: &mut F,
@@ -57,6 +68,9 @@ fn process_loop<F, T, const DELETED: bool>(
         }
     }
 }
+// ANCHOR_END
+
+fn main() {}
 ```
 相比 `retain_mut`，有几个需要注意的问题：
 1. 我们把具有所有权的值本身传给了闭包，闭包一旦 panic，这个值会被自动释放，此时 Vec 里面绝对不能留着这个值的空洞了。所以我们需要提前增加 `processed_len` 和 `deleted_cnt`（第 15～16 行），并在返回 `Some`的情况下把值减回去。你可能注意到这里先把 `processed_len` 减回去了，后面又再加上，很奇怪的操作对吗？注意按照原方法的逻辑，此时是还没有处理过这个元素的，此时使用`g.v.as_mut_ptr().add(g.processed_len - g.deleted_cnt)` 来计算当前的空洞元素的位置是正确的。如果我们不想减回去又再加回来，那就需要改成 `g.v.as_mut_ptr().add(g.processed_len - 1 - g.deleted_cnt)`，感觉代码可读性更糟糕了，没有必要。
@@ -90,6 +104,11 @@ fn process_loop<F, T, const DELETED: bool>(
 所以，我们完全可以采取不同的思路，Rust 的设计是，产生指针、获取指针是安全的，只有解引用指针是不安全的。我们可以反过来，只有创建结构体或者把值从结构体里面取出来的时候是 unsafe，其他时候都是 safe。这样一来，我们确保了只有 safe 方法不会导致 UB，而涉及到 unsafe 的时候，就不需要我们负责了。
 使用指针的实现如下：
 ```Rust
+// runnable
+use std::ptr;
+use std::ops::{Deref, DerefMut};
+
+// ANCHOR
 pub struct TakeCell<T> {
     value: *mut T,
 }
@@ -134,10 +153,18 @@ impl<T> DerefMut for TakeCell<T> {
         unsafe { &mut *self.value }
     }
 }
+// ANCHOR_END
+
+fn main() {}
 ```
 实现相当简单，我就不过多赘述了。当然，操作指针可能还显得有点危险，我们完全可以实现一个使用 `Option` 与引用的版本。
 ### 实现 TakeRef
 ```Rust
+// runnable
+use std::ptr;
+use std::ops::{Deref, DerefMut};
+
+// ANCHOR
 pub struct TakeRef<'a, T> {
     value: Option<&'a mut T>,
 }
@@ -185,6 +212,9 @@ impl<'a, T> DerefMut for TakeRef<'a, T> {
         unsafe { self.value.as_deref_mut().unwrap_unchecked() }
     }
 }
+// ANCHOR_END
+
+fn main() {}
 ```
 这里的 new 可以被标记为 safe 方法，因为 Rust 的引用总是有效的，存入一个有效的引用，后续使用的时候总是安全的。
 在初始化 DropGuard 的时候，我们需要一个占位的 TakeRef，它永远不会被使用，所以我在这里还写了一个 unsafe 的 `new_none` 方法。
@@ -193,121 +223,191 @@ impl<'a, T> DerefMut for TakeRef<'a, T> {
 ### 实现 retain_mut_value
 在实现了 TakeRef / TakeCell 之后，我们就可以着手实现方法本身了，使用两种结构体的实现差不多，在此仅介绍使用 TakeRef 的实现。
 ```Rust
-fn retain_mut_value_another<F>(&mut self, mut f: F)
-where
-	F: FnMut(&mut TakeRef<T>),
-{
-	struct BackshiftOnDrop<'a, T> {
-		v: &'a mut Vec<T>,
-		processed_len: usize,
-		deleted_cnt: usize,
-		original_len: usize,
-		take_ref: TakeRef<'a, T>,
-		processed: bool,
-	}
+// runnable
+use std::ptr;
+use std::ops::{Deref, DerefMut};
 
-	impl<T> Drop for BackshiftOnDrop<'_, T> {
-		fn drop(&mut self) {
-			if !self.processed && !self.take_ref.is_valid() {
-				self.deleted_cnt += 1;
-				self.processed_len += 1;
-			}
-			if self.deleted_cnt > 0 {
-				// SAFETY: Trailing unchecked items must be valid since we never touch them.
-				unsafe {
-					ptr::copy(
-						self.v.as_ptr().add(self.processed_len),
-						self.v
-							.as_mut_ptr()
-							.add(self.processed_len - self.deleted_cnt),
-						self.original_len - self.processed_len,
-					);
-				}
-			}
-			// SAFETY: After filling holes, all items are in contiguous memory.
-			unsafe {
-				self.v.set_len(self.original_len - self.deleted_cnt);
-			}
-		}
-	}
-
-	let original_len = self.len();
-
-	if original_len == 0 {
-		// Empty case: explicit return allows better optimization, vs letting compiler infer it
-		return;
-	}
-
-	// Avoid double drop if the drop guard is not executed,
-	// since we may make some holes during the process.
-	unsafe { self.set_len(0) };
-
-	let mut g = BackshiftOnDrop {
-		v: self,
-		processed_len: 0,
-		deleted_cnt: 0,
-		original_len,
-		// SAFETY: `original_len` is always greater than 0, so the loop will always run at least once.
-		// Therefore, this `none` will definitely be replaced.
-		take_ref: unsafe { TakeRef::new_none() },
-		processed: false,
-	};
-
-	fn process_loop<F, T, const DELETED: bool>(
-		original_len: usize,
-		f: &mut F,
-		g: &mut BackshiftOnDrop<'_, T>,
-	) where
-		F: FnMut(&mut TakeRef<T>),
-	{
-		while g.processed_len != original_len {
-			// SAFETY: Unchecked element must be valid.
-			let cur = unsafe { &mut *g.v.as_mut_ptr().add(g.processed_len) };
-			let take_ref = TakeRef::new(cur);
-			// Reset processed flag for each element
-			g.processed = false;
-			// Update the TakeRef
-			g.take_ref = take_ref;
-			f(&mut g.take_ref);
-			if !g.take_ref.is_valid() {
-				// advance the counter
-				g.processed_len += 1;
-				g.deleted_cnt += 1;
-				// Mark as processed
-				g.processed = true;
-				if DELETED {
-					continue;
-				} else {
-					break;
-				}
-			}
-			if DELETED {
-				// SAFETY: `deleted_cnt` > 0, so the hole slot must not overlap with current element.
-				// We use write for move, and never touch this element again.
-				unsafe {
-					let hole_slot = g.v.as_mut_ptr().add(g.processed_len - g.deleted_cnt);
-					ptr::copy_nonoverlapping(
-						g.take_ref.value.as_deref().unwrap_unchecked(),
-						hole_slot,
-						1,
-					);
-				}
-			}
-			// Advance the counter and mark as processed
-			g.processed_len += 1;
-			g.processed = true;
-		}
-	}
-
-	// Stage 1: Nothing was deleted.
-	process_loop::<F, T, false>(original_len, &mut f, &mut g);
-
-	// Stage 2: Some elements were deleted.
-	process_loop::<F, T, true>(original_len, &mut f, &mut g);
-
-	// All item are processed. This can be optimized to `set_len` by LLVM.
-	drop(g);
+pub struct TakeRef<'a, T> {
+    value: Option<&'a mut T>,
 }
+
+impl<'a, T> TakeRef<'a, T> {
+    fn new(value: &'a mut T) -> Self {
+        TakeRef { value: Some(value) }
+    }
+
+    /// # Safety
+    /// The caller must ensure the `TakeRef` will never be used.
+    unsafe fn new_none() -> Self {
+        TakeRef { value: None }
+    }
+
+    /// # Safety
+    /// - The caller must ensure that `TakeRef` is not taken before calling this method.
+    /// - The caller must ensure that the `TakeRef` is not used after taking the inner value.
+    pub unsafe fn take_inner(&mut self) -> T {
+        debug_assert!(self.is_valid(), "TakeRef is already taken");
+        // SAFETY: We ensure that `value` is some.
+        let inner = unsafe { ptr::read(self.value.take().unwrap_unchecked()) };
+        inner
+    }
+
+    pub fn is_valid(&self) -> bool {
+        self.value.is_some()
+    }
+}
+
+impl<'a, T> Deref for TakeRef<'a, T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        debug_assert!(self.is_valid(), "TakeRef is already taken");
+        // SAFETY: We ensure that `value` is some.
+        unsafe { self.value.as_deref().unwrap_unchecked() }
+    }
+}
+
+impl<'a, T> DerefMut for TakeRef<'a, T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        debug_assert!(self.is_valid(), "TakeRef is already taken");
+        // SAFETY: We ensure that `value` is some.
+        unsafe { self.value.as_deref_mut().unwrap_unchecked() }
+    }
+}
+
+trait RetainValue<T>{
+    fn retain_mut_value_another<F>(&mut self, f: F)
+    where
+        F: FnMut(&mut TakeRef<T>);
+}
+
+// ANCHOR
+impl<T> RetainValue<T> for Vec<T>{
+    fn retain_mut_value_another<F>(&mut self, mut f: F)
+    where
+    	F: FnMut(&mut TakeRef<T>),
+    {
+    	struct BackshiftOnDrop<'a, T> {
+    		v: &'a mut Vec<T>,
+    		processed_len: usize,
+    		deleted_cnt: usize,
+    		original_len: usize,
+    		take_ref: TakeRef<'a, T>,
+    		processed: bool,
+    	}
+    
+    	impl<T> Drop for BackshiftOnDrop<'_, T> {
+    		fn drop(&mut self) {
+    			if !self.processed && !self.take_ref.is_valid() {
+    				self.deleted_cnt += 1;
+    				self.processed_len += 1;
+    			}
+    			if self.deleted_cnt > 0 {
+    				// SAFETY: Trailing unchecked items must be valid since we never touch them.
+    				unsafe {
+    					ptr::copy(
+    						self.v.as_ptr().add(self.processed_len),
+    						self.v
+    							.as_mut_ptr()
+    							.add(self.processed_len - self.deleted_cnt),
+    						self.original_len - self.processed_len,
+    					);
+    				}
+    			}
+    			// SAFETY: After filling holes, all items are in contiguous memory.
+    			unsafe {
+    				self.v.set_len(self.original_len - self.deleted_cnt);
+    			}
+    		}
+    	}
+    
+    	let original_len = self.len();
+    	if original_len == 0 {
+    		// Empty case: explicit return allows better optimization, vs letting compiler infer it
+    		return;
+    	}
+    	// Avoid double drop if the drop guard is not executed,
+    	// since we may make some holes during the process.
+    	unsafe { self.set_len(0) };
+    
+    	let mut g = BackshiftOnDrop {
+    		v: self,
+    		processed_len: 0,
+    		deleted_cnt: 0,
+    		original_len,
+    		// SAFETY: `original_len` is always greater than 0, so the loop will always run at least once.
+    		// Therefore, this `none` will definitely be replaced.
+    		take_ref: unsafe { TakeRef::new_none() },
+    		processed: false,
+    	};
+    
+    	fn process_loop<F, T, const DELETED: bool>(
+    		original_len: usize,
+    		f: &mut F,
+    		g: &mut BackshiftOnDrop<'_, T>,
+    	) where
+    		F: FnMut(&mut TakeRef<T>),
+    	{
+    		while g.processed_len != original_len {
+    			// SAFETY: Unchecked element must be valid.
+    			let cur = unsafe { &mut *g.v.as_mut_ptr().add(g.processed_len) };
+    			let take_ref = TakeRef::new(cur);
+    			// Reset processed flag for each element
+    			g.processed = false;
+    			// Update the TakeRef
+    			g.take_ref = take_ref;
+    			f(&mut g.take_ref);
+    			if !g.take_ref.is_valid() {
+    				// advance the counter
+    				g.processed_len += 1;
+    				g.deleted_cnt += 1;
+    				// Mark as processed
+    				g.processed = true;
+    				if DELETED {
+    					continue;
+    				} else {
+    					break;
+    				}
+    			}
+    			if DELETED {
+    				// SAFETY: `deleted_cnt` > 0, so the hole slot must not overlap with current element.
+    				// We use write for move, and never touch this element again.
+    				unsafe {
+    					let hole_slot = g.v.as_mut_ptr().add(g.processed_len - g.deleted_cnt);
+    					ptr::copy_nonoverlapping(
+    						g.take_ref.value.as_deref().unwrap_unchecked(),
+    						hole_slot,
+    						1,
+    					);
+    				}
+    			}
+    			// Advance the counter and mark as processed
+    			g.processed_len += 1;
+    			g.processed = true;
+    		}
+    	}
+    	// Stage 1: Nothing was deleted.
+    	process_loop::<F, T, false>(original_len, &mut f, &mut g);
+    	// Stage 2: Some elements were deleted.
+    	process_loop::<F, T, true>(original_len, &mut f, &mut g);
+    	// All item are processed. This can be optimized to `set_len` by LLVM.
+    	drop(g);
+    }
+}
+
+fn main() {
+    let mut list = ["apple", "banana", "cat"].into_iter().map(|s| s.to_string()).collect::<Vec<_>>();
+    let mut fruit_list = Vec::new();
+    list.retain_mut_value_another(|s| {
+        if &**s == "apple" || &**s == "banana" {
+            let str = unsafe { s.take_inner() };
+            fruit_list.push(str);
+        } 
+    });
+    println!("list: {:?}", list);
+    println!("fruits: {:?}", fruit_list);
+}
+// ANCHOR_END
 ```
 相比标准库，我们这里要改动的东西不少：
 1. 如果闭包在执行的时候 panic 了，那么我们需要移动元素，填补 Vec 里的空洞，这里的情况有些不同，我们无法直接确定要填补的空洞，因为 TakeRef 此时可能被 `take_inner` 了，也可能没有。如果里面的值已经被取走了，那此时 Vec 里出现了一个空洞，应该把它填上；如果里面的值还没有被取走，也就是说，可能维持原样，或者被修改了，此时就不能动 Vec 里的值。因此，我们需要在 drop guard 里存储当前的 TakeRef，用于在 `drop` 方法中进行判断。我们还需要在 drop guard 里存储一个布尔值，在这里是 `processed`，用于判断当前的 TakeRef 是否被妥善处理了。只有当 `processed` 为 `false`，且 TakeRef 里的值已经被取走了，才需要在 drop 方法里额外填补一个空洞，否则无需处理。

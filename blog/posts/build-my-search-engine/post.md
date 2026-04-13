@@ -22,14 +22,14 @@
 
 ### 中文分词
 中文分词就复杂多了，但是好在有现成的库可以用，我选择了 `jieba-rs` ，它是 jieba 中文分词的 Rust 实现。可以很好地把一句话切分成 tokens，如：
-```rust
+```Rust
 let jieba = jieba_rs::Jieba::new();
 let sentence = "我们中出了一个叛徒";
 let words = jieba.cut(sentence, false);
 assert_eq!(words, ["我们", "中", "出", "了", "一个", "叛徒"])
 ```
 如果中文里面夹杂英文，jieba 会顺便把英文按空格和标点符号分割输出：
-```rust
+```Rust
 let jieba = jieba_rs::Jieba::new();
 let sentence = "btw, 我用的是Arch Linux系统";
 let words = jieba.cut(sentence, false);
@@ -40,7 +40,7 @@ assert_eq!(words, ["btw", ",", " ", "我", "用", "的", "是", "Arch", " ", "Li
 ### 停用词 (Stop Words)
 在中英文中，有些字词使用极其广泛，却没什么实际含义（如“的”"the"），或者有实际含义，但是因为使用过于广泛，在大量的搜索结果中出现，使这些结果的评分都很高，无法帮助缩小搜索范围，这类字词被称为停用词。为了提高搜索的准确性和效率，一般会把这些词从 tokens 中移除。
 tantivy 使用的英文停用词，和 Lucene 是一样的，来自[这里](https://github.com/apache/lucene/blob/d5d6dc079395c47cd6d12dcce3bcfdd2c7d9dc63/lucene/analysis/common/src/java/org/apache/lucene/analysis/en/EnglishAnalyzer.java#L46) ，大部分都是虚词。
-```rust
+```Rust
 ["a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "if", "in",
 "into", "is", "it", "no", "not", "of", "on", "or", "such", "that", "the",
 "their", "then", "there", "these", "they", "this", "to", "was", "will", "with"]
@@ -50,7 +50,7 @@ tantivy 使用的英文停用词，和 Lucene 是一样的，来自[这里](http
 ### 实现
 得益于 tantivy 这一强大框架，实现起来相当简单
 此处的代码仅供参考，实际使用的源码都在 [my_blog](https://github.com/lhz07/my_blog/tree/master/src/search_utils) 项目里的 search_utils 模块下。
-```rust
+```Rust
 let mut jieba_analyzer =
     // 这里的 `JiebaMode::CutAll` 是我给 tantivy 写的 jieba wrapper 里面加的，
     // 内部就是调用 jieba 的 cutall 模式，也就是列出所有可能的分词，这样我们的索引会更丰富
@@ -107,7 +107,7 @@ while let Some(token) = token_stream.next() {
 ### 文本预处理
 我的博客文章都是用 markdown 格式写的，对于分词来说，符号没什么影响，但是生成摘要的时候就会出现一堆 “##” 和 “\*\*”，看起来十分难受。所以这个阶段主要是为了搜索后结果的可读性服务，并不会明显影响搜索的效果。
 首先，使用 `comrak` 这个 crate 生成语法树，然后遍历它，并输出纯文本。
-```rust
+```Rust
 /// Recursively walk the AST and collect only plain text.
 fn render_plain<'a>(node: &'a AstNode<'a>, output: &mut String) {
     for child in node.children() {
@@ -147,7 +147,11 @@ fn render_plain<'a>(node: &'a AstNode<'a>, output: &mut String) {
 }
 ```
 在这之后，输出的文本还不是特别美观，所以再用三个正则表达式处理一下。
-```rust
+```Rust
+use regex::Regex;
+use std::sync::LazyLock;
+
+// ANCHOR
 pub fn preprocess_text(text: &str) -> String {
     // 这里的 \p{Han} 是指匹配所有汉字，包括简中，繁中，日韩文中的汉字
     static RE1: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"([a-zA-Z])(\p{Han})").unwrap());
@@ -160,6 +164,7 @@ pub fn preprocess_text(text: &str) -> String {
     // 把所有连续的空白（包括空格、换行符等）合并为一个空格
     RE3.replace_all(&iter2, " ").to_string()
 }
+// ANCHOR_END
 ```
 处理过后的文本大致长这样
 
@@ -168,7 +173,7 @@ pub fn preprocess_text(text: &str) -> String {
 ### 建立索引
 我在此省略掉了一些和构建索引无关的代码，因此这段代码仅供示意流程，实际上无法直接运行。
 这里我们将内容存储到了不同的 field 里，这是为了后续搜索时更方便。比如文章内容和标题是分开存储的，这样查询的时候，可以区分匹配标题和内容，若关键词匹配标题则可以获得更高的评分。文件的实际路径也存储到单独的位置，它和搜索的内容无关。文章的 tags 则存储到 facet 里面，之后可以根据 facet 来匹配，如果查询已经选定了某些 tags，那么不含这些 tags 的文章可以直接被过滤掉。
-```rust
+```Rust
 pub fn build_index() -> Result<(), CatError> {
     let mut schema_builder = Schema::builder();
     // prepare indexing options per-field with tokenizer name
@@ -247,7 +252,7 @@ Tantivy 使用的核心打分算法是 BM25，它具有以下特点：
 
 #### 基础查询
 之前也提到过，我的文章以中文为主，英文出现得比较少，所以接下来构造查询时，我们也要给它们加上不同的权重。
-```rust
+```Rust
 for tk in tokens.iter() {
 	// jieba 已经把中英文分到不同的 token 里去了，所以只要这个 token 包含任何
 	// 汉字，就当作中文来处理
@@ -312,7 +317,7 @@ for tk in tokens.iter() {
 
 那么按照先前的查询逻辑，文档 1 和 2 都能成功匹配，但是按照短语查询的逻辑，文档 2 的“人工”和“智能”靠得很近，slop 为 1，小于 10，成功匹配，在短语查询获得了分数；而文档 1 的“人工”和“智能”的 slop 为 25，大于 10，无法匹配，在短语查询这块不得分。
 先使用 jieba 的 search 模式切出来 tokens，再在 tokens 数量大于 1 时，加上额外的 PhraseQuery
-```rust
+```Rust
 if proximity_subs.len() > 1 {
 	let mut proximity_query = tantivy::query::PhraseQuery::new(proximity_subs);
 	// 设置适当的 slop
@@ -329,7 +334,7 @@ if proximity_subs.len() > 1 {
 ```
 #### 过滤 tags
 如果搜索的时候指定了 tags，那就应该只在包含这些 tags 的文章里查询，实现非常简单，使用 `Occur::Must` 即可。
-```rust
+```Rust
 if let Some(tags) = tags {
 	// 从我们先前构建的索引中取出 tags 部分的内容
 	let tag_facet = schema.get_field("tags")?;
@@ -352,7 +357,7 @@ if let Some(tags) = tags {
 ## 生成摘要
 这部分就很简单了，基本上是按照 Tantivy 的接口，把结果对应的文档路径提取出来，再生成摘要，Tantivy 生成的 snippet 有个方便的 `to_html()` 方法，可以直接生成 html，并在里面用 `<b></b>` 包住需要高亮的关键词。
 
-```rust
+```Rust
 // 创建一个 snippet 生成器
 let mut zh_snippet_gen = SnippetGenerator::create(&searcher, &boolean_query, content).unwrap();
 // 设置最大的摘要长度
@@ -396,7 +401,7 @@ let terms_iter =
 还能不能再优化？经过反复测试，我发现生成摘要竟然是最耗时的操作，整个搜索耗时 13.2ms ，但生成 snippet 前只用了 916 µs，也就是说，生成 snippet 的时间占了整个搜索的时间的 93%
 再仔细一看，发现每生成一个摘要，都要耗时 2-5 ms 左右，所以搜索结果越多，搜索耗时就越高。
 于是我使用 rayon 库对生成摘要的过程进行了并行化，优化完后，整个搜索耗时就只有 3.5 ms 了，比之前快多了。
-```rust
+```Rust
 // 使用 rayon 库并行化生成摘要的过程
 let terms_iter = top_docs.into_par_iter()
 ```

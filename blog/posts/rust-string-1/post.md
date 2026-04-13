@@ -23,11 +23,16 @@ string literals 就是代码里的常量字符串，比如写 `let text = "abc";
 #### len 方法
 String 和 str 都有 len 方法，但是它们都只表示内部存储的 u8 数组的长度，并不一定是人类可读的字符串长度，因为 UTF-8 是可变长度编码，当一个 u8 存不下字符时，会使用多个 u8。比如
 ```Rust
-let len = "foo".len();
-assert_eq!(3, len);
-
-assert_eq!("ƒoo".len(), 4); // fancy f!
-assert_eq!("ƒoo".chars().count(), 3);
+// runnable
+fn main(){
+    // ANCHOR
+    let len = "foo".len();
+    assert_eq!(3, len);
+    
+    assert_eq!("ƒoo".len(), 4); // fancy f!
+    assert_eq!("ƒoo".chars().count(), 3);
+    // ANCHOR_END
+}
 ```
 当然，实际上字符串的处理更加复杂[^1]。
 
@@ -133,14 +138,29 @@ impl<B: ?Sized + ToOwned> Clone for Cow<'_, B> {
 当然，生命周期本身是个非常复杂的东西，我实际使用的时候，会稍微简化一下，像这样，用于错误处理。
 这是我定义的自己的错误类型
 ```Rust
+// runnable
+use std::borrow::Cow;
+use std::io;
+
+// ANCHOR
+#[derive(Debug)]
 enum CatError{
 	Custom(Cow<'static, str>),
 }
+
 impl CatError {
     pub fn custom<S: Into<Cow<'static, str>>>(s: S) -> Self {
         CatError::Custom(s.into())
     }
 }
+
+fn main() {
+    let err1 = CatError::custom(format!("error: {}", io::Error::from_raw_os_error(libc::EACCES)));
+    let err2 = CatError::custom("io error");
+    println!("err1: {:?}", err1);
+    println!("err2: {:?}", err2);
+}
+// ANCHOR_END
 ```
 将 Cow 的借用限制为静态生命周期，也就是字符串常量。
 配合 `custom` 方法，在构造错误时，如果需要携带额外信息，就使用 `CatError::custom(format!("error: {e}"))`—— 构造一个字符串，再用 Cow 包起来；如果不需要额外信息，就可以 `CatError::custom("an error occured")` ，直接把字符串常量包起来，没有额外分配。
