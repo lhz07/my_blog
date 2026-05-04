@@ -1,14 +1,19 @@
 tech_stack = ["Rust", "C++", "Qt", "Python", "Objective C (?)", "Web (?)"]
 
 [[repo]]
-name = "my_blog"
-url = "https://github.com/lhz07/my_blog"
-description = "My personal blog built with Rust and Actix-web"
-
-[[repo]]
 name = "bangumi_download"
 url = "https://github.com/lhz07/bangumi_download"
 description = "A tool to download bangumi automatically from mikan"
+
+[[repo]]
+name = "hypertile"
+url = "https://github.com/lhz07/ratatui-hypertile"
+description = "A tmux like tool with hyprland-style tiling"
+
+[[repo]]
+name = "my_blog"
+url = "https://github.com/lhz07/my_blog"
+description = "My personal blog built with Rust and Actix-web"
 
 [[contact]]
 name = "GitHub"
@@ -18,7 +23,7 @@ icon_dark = "/static/img/github_dark.svg"
 
 [[contact]]
 name = "Email"
-url = "mailto:a2722764368@gmail.com"
+url = "mailto:lhz07c@gmail.com"
 icon = "/static/img/mail.svg"
 icon_dark = "/static/img/mail_dark.svg"
 
