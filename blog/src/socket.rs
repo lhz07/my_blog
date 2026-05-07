@@ -61,7 +61,7 @@ async fn connect() -> Result<(), io::Error> {
 }
 
 fn reload(paths: Vec<String>, last_format: &mut Instant) -> Result<(), ()> {
-    let ins = std::time::Instant::now();
+    let mut ins = time::Instant::now();
     // reload tera templates
     TEMPLATES.get_mut().full_reload().map_err(|e| {
         log::error!("tera error: {e}");
@@ -79,6 +79,7 @@ fn reload(paths: Vec<String>, last_format: &mut Instant) -> Result<(), ()> {
     })?;
     *ARCHIVES.get_mut() = map;
     log::info!("tera cost: {:?}", ins.elapsed());
+    ins = time::Instant::now();
     log::info!("Templates reloaded.");
     if last_format.elapsed() > Duration::from_secs(3) {
         for path in paths {
@@ -88,6 +89,7 @@ fn reload(paths: Vec<String>, last_format: &mut Instant) -> Result<(), ()> {
             }
         }
     }
+    log::info!("format cost: {:?}", ins.elapsed());
     *last_format = time::Instant::now();
     Ok(())
 }

@@ -35,7 +35,14 @@ async fn listen(mut rx: Receiver<Message>) -> std::io::Result<()> {
             res = rx.recv() => {
                 match res {
                     Some(Message::Reload(ins, path)) => {
-                        let msg = SocketMsg::Reload(path.into_iter().filter(|p|p.ends_with("post.md")).map(|p|p.into_os_string().into_string().unwrap()).collect());
+                        let msg = SocketMsg::Reload(path.into_iter().filter(|p|p.ends_with("post.md")|| p.ends_with("post.md~")).map(|p| {
+                            if p.ends_with("post.md~"){
+                                p.as_os_str().to_str().unwrap().strip_suffix("~").unwrap().to_string()
+                            }else{
+                                p.into_os_string().into_string().unwrap()
+                            }
+
+                        }).collect());
                         let content = bitcode::encode(&msg);
                         if let Err(e) = socket.write_all(&(content.len() as u32).to_be_bytes()).await {
                             eprintln!("Failed to send data to {}: {}", socket.addr().unwrap(), e);

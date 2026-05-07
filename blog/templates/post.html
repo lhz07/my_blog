@@ -5,7 +5,7 @@ meta_data.author }} {% endblock title %} {% block scripts %}
 {% endblock scripts %} {% block theme_button %} {% endblock theme_button %} {%
 block header %}
 <meta property="og:title" content="{{meta_data.file_name}}" />
-<div id="article-header" class="container mx-auto px-6 pt-6 md:max-w-4xl">
+<div id="article-header" class="container mx-auto px-2 pt-6 md:max-w-4xl">
   <div class="flex items-center justify-between">
     <a
       href="{{ back }}"
@@ -29,10 +29,10 @@ block header %}
   </div>
 </div>
 {% endblock header %} {% block main %}
-<main class="container mx-auto px-1 py-8 md:max-w-3xl relative flex-col">
+<main class="container mx-auto px-1 py-8 md:max-w-4xl relative flex-col">
   <main
     id="article-content"
-    class="container mx-auto md:max-w-3xl relative flex-col"
+    class="container mx-auto md:max-w-4xl relative flex-col"
   >
     <!-- Article Card -->
     <article
@@ -245,7 +245,7 @@ block header %}
   </svg>
 </button>
 <div
-  class="giscus max-w-3xl mx-auto my-8 p-4 bg-white dark:bg-slate-700 dark:border-0 rounded-2xl border border-gray-200 shadow-sm overflow-hidden text-gray-800 dark:text-slate-100"
+  class="giscus md:max-w-4xl mx-auto my-8 p-4 bg-white dark:bg-slate-700 dark:border-0 rounded-2xl border border-gray-200 shadow-sm overflow-hidden text-gray-800 dark:text-slate-100"
 >
   <script
     src="https://giscus.app/client.js"

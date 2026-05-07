@@ -1,0 +1,9 @@
+title = '写一个类似doas的程序（一）'
+file_name = 'build-my-doas-1'
+description = '用 Rust 写一个类似 doas 的程序，并增加更多功能'
+tags = ['Rust', 'Generator', 'Iterator', 'Lexical', 'Programming', 'Create', 'doas']
+posted = '2026-05-07T23:00:06+08:00'
+updated = '2026-05-07T23:00:06+08:00'
+estimated_reading_time = 20
+author = 'lhz07'
+cover_image = "/static/img/posts/build-my-doas-1/cover.webp"
