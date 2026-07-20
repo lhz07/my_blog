@@ -1,0 +1,9 @@
+title = '在 Rust 中实现 defer'
+file_name = 'implement-defer-in-rust'
+description = '介绍 DropGuard 与 macro_rules，并实现 defer! 宏'
+tags = ['Rust', 'defer', 'RAII', 'Macro', 'Drop', 'Create']
+posted = '2026-07-21T00:38:06+08:00'
+updated = '2026-07-21T00:38:06+08:00'
+estimated_reading_time = 50
+author = 'lhz07'
+cover_image = "static/img/posts/implement-defer-in-rust/cover.webp"
