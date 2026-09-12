@@ -73,3 +73,10 @@ url = "https://ex-tasty.com"
 # src="https://save1.ex-tasty.com/media/tasty-icon.webp"
 avatar = "static/img/friends/tasty-icon.webp"
 description = "邪惡與極限伴您一生……🥰"
+
+[[friend]]
+name = "Astrarix Archive"
+url = "https://kokosa.icu"
+# src="https://kokosa.icu/main/about/kokosa-avatar.6lZ74eVt.avif"
+avatar = "static/img/friends/kokosa.avif"
+description = "乱七八糟的个人站"
