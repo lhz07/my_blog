@@ -80,3 +80,17 @@ url = "https://kokosa.icu"
 # src="https://kokosa.icu/main/about/kokosa-avatar.6lZ74eVt.avif"
 avatar = "static/img/friends/kokosa.avif"
 description = "乱七八糟的个人站"
+
+[[friend]]
+name = "alimey. 的个人主页"
+url = "https://www.alimeylab.com"
+# src="https://www.alimeylab.com/alimey.jpg"
+avatar = "static/img/friends/alimey.webp"
+description = "在天际线的彼方，心绪飘忽轻吟。"
+
+[[friend]]
+name = "Meixu0's Blog"
+url = "https://meixu0.cat"
+# src="https://meixu0.cat/avatar.png"
+avatar = "static/img/friends/meixu0.webp"
+description = "美绪澪的博客"
